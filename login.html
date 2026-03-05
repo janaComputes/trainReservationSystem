@@ -1,22 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-   <h2>Train Reservation System Login</h2>
-   <form id ="loginForm">
-    <label>Username</label>
-    <input type="text" id = "username" required>
-    <label>Password</label>
-    <input type="password" id = "password" required>
-    <button type = "submit">Login</button>
-    <p id ="error"></p>
-   </form>
-   <script src="users.js"></script>
-   <script src="auth.js"></script>
+
+<div class="login-container">
+
+<div class="icon">🚆</div>
+
+<h2>Train Reservation System</h2>
+<p class="subtitle">Sign in to manage reservations and passengers</p>
+
+<form id="loginForm">
+
+<label>Username</label>
+<input type="text" id="username" placeholder="Enter username" required>
+
+<label>Password</label>
+<input type="password" id="password" placeholder="Enter password" required>
+
+<div class="role">
+<p>Login as</p>
+
+<label class="radio">
+<input type="radio" name="role" checked>
+Staff
+</label>
+
+<label class="radio">
+<input type="radio" name="role">
+Admin
+</label>
+</div>
+
+<button type="submit">Sign In</button>
+<p class="signup-link">
+Don't have an account?
+<a href="#" onclick="showSignup()">Sign Up</a>
+</p>
+<p id="error"></p>
+
+</form>
+<form id="signupForm" style="display:none;">
+
+<h3>Create Account</h3>
+
+<label>Username</label>
+<input type="text" id="newUsername" required>
+
+<label>Password</label>
+<input type="password" id="newPassword" required>
+
+<button type="submit">Create Account</button>
+
+<p class="signup-link">
+Already have an account?
+<a href="#" onclick="showLogin()">Login</a>
+</p>
+
+</form>
+
+
+</div>
+<script>
+
+function showSignup(){
+document.getElementById("loginForm").style.display="none";
+document.getElementById("signupForm").style.display="block";
+}
+
+function showLogin(){
+document.getElementById("signupForm").style.display="none";
+document.getElementById("loginForm").style.display="block";
+}
+
+</script>
+<script src="users.js"></script>
+<script src="auth.js"></script>
+
 </body>
 </html>
