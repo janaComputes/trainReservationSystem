@@ -1,0 +1,2 @@
+function saveData(key,data){};
+  
