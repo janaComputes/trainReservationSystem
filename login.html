@@ -4,8 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-   
+   <h2>Train Reservation System Login</h2>
+   <form id ="loginForm">
+    <label>Username</label>
+    <input type="text" id = "username" required>
+    <label>Password</label>
+    <input type="password" id = "password" required>
+    <button type = "submit">Login</button>
+    <p id ="error"></p>
+   </form>
+   <script src="users.js"></script>
+   <script src="auth.js"></script>
 </body>
 </html>
