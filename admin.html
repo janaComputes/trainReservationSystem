@@ -2,96 +2,219 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Train Reservation System</title>
-<link rel="stylesheet" href="style.css">
+<!-- <link rel="stylesheet" href="dashboard.css"> -->
 </head>
 
 <body>
+
+<header class="topbar">
+
+<div class="logo">
+🚆 Train Reservation System
+<p id="roleText"></p>
+</div>
+
+<button id="logoutBtn">Logout</button>
+
+</header>
+
+
+<nav class="tabs">
+
+<button class="tab active" data-tab="reservations">
+Reservations
+</button>
+
+<button class="tab" data-tab="passengers">
+Passengers
+</button>
+
+<button class="tab" data-tab="trains">
+Trains
+</button>
+
+</nav>
+
+
+
+<!-- Reservations -->
+
+<section id="reservations" class="content active">
+
+<div class="sectionHeader">
+<h2>Reservations</h2>
+
+<button id="addReservation">Add Reservation</button>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Passenger</th>
+<th>Train</th>
+<th>Date</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="reservationTable">
+
+<tr>
+<td colspan="5">No reservations yet</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</section>
+
+
+
+<!-- Passengers -->
+
+<section id="passengers" class="content">
+
+<div class="sectionHeader">
+<h2>Passengers</h2>
+
+<button id="addPassenger">Add Passenger</button>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="passengerTable">
+
+<tr>
+<td colspan="4">No passengers added</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</section>
+
+
+
+<!-- Trains -->
+
+<section id="trains" class="content">
+
+<div class="sectionHeader">
+<h2>Train Management</h2>
+
+<button id="addTrain">Add Train</button>
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Train ID</th>
+<th>Name</th>
+<th>Route</th>
+<th>Total Seats</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+
+</thead>
+
+<tbody id="trainTable">
+
+<tr>
+<td colspan="6">No trains added yet</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</section>
+
 <style>body{
 font-family: Arial;
-background:#f5f6fa;
+background:#f4f6f9;
 margin:0;
-padding:20px;
 }
 
-header{
+.topbar{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:20px;
+background:white;
+padding:15px 40px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
-.logo span{
+.logo{
 font-size:20px;
 font-weight:bold;
 }
 
-.logo p{
-margin:0;
-color:gray;
-font-size:13px;
-}
-
-.logout{
-padding:8px 16px;
-border:1px solid #ccc;
-background:white;
-border-radius:6px;
-cursor:pointer;
-}
-
 .tabs{
 display:flex;
+justify-content:center;
+margin:20px;
 gap:10px;
-margin-bottom:20px;
 }
 
 .tab{
 padding:10px 20px;
 border:none;
-background:#eaeaea;
+background:#ddd;
 border-radius:20px;
 cursor:pointer;
 }
 
 .tab.active{
-background:white;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
+background:#0b1c3f;
+color:white;
 }
 
 .content{
 display:none;
+width:80%;
+margin:auto;
 background:white;
 padding:20px;
 border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 .content.active{
 display:block;
 }
 
-.section-header{
+.sectionHeader{
 display:flex;
 justify-content:space-between;
 align-items:center;
 margin-bottom:15px;
 }
 
-.primary{
-background:#0d0c22;
+button{
+background:#0b1c3f;
 color:white;
 border:none;
-padding:10px 15px;
-border-radius:8px;
+padding:8px 15px;
+border-radius:5px;
 cursor:pointer;
-}
-
-.search{
-width:100%;
-padding:10px;
-margin-bottom:15px;
-border-radius:8px;
-border:1px solid #ddd;
 }
 
 table{
@@ -100,133 +223,86 @@ border-collapse:collapse;
 }
 
 th,td{
-padding:12px;
+padding:10px;
 border-bottom:1px solid #eee;
 text-align:left;
+}</style>
+<script>const role = localStorage.getItem("role")
+
+const roleText = document.getElementById("roleText")
+
+roleText.innerText = "Logged in as: " + role
+
+
+
+// logout
+
+document.getElementById("logoutBtn").onclick = function(){
+
+localStorage.clear()
+
+window.location.href="login.html"
+
 }
 
-.empty{
-text-align:center;
-color:gray;
-padding:30px;
-}</style>
-<header>
-    <div class="logo">
-        🚆 <span>Train Reservation System</span>
-        <p>Logged in as: Admin</p>
-    </div>
-
-    <button class="logout">Logout</button>
-</header>
 
 
-<div class="tabs">
-    <button class="tab active" onclick="showTab('reservations')">Reservations</button>
-    <button class="tab" onclick="showTab('passengers')">Passengers</button>
-    <button class="tab" onclick="showTab('trains')">Trains</button>
-</div>
+// Tabs
+
+const tabs = document.querySelectorAll(".tab")
+
+const contents = document.querySelectorAll(".content")
+
+tabs.forEach(tab => {
+
+tab.onclick = () => {
+
+tabs.forEach(t=>t.classList.remove("active"))
+
+contents.forEach(c=>c.classList.remove("active"))
+
+tab.classList.add("active")
+
+document.getElementById(tab.dataset.tab).classList.add("active")
+
+}
+
+})
 
 
-<!-- Reservations -->
-<div id="reservations" class="content active">
 
-    <div class="section-header">
-        <div>
-            <h2>Reservation Management</h2>
-            <p>Create and manage train reservations</p>
-        </div>
+// Role permissions
 
-        <button class="primary">New Reservation</button>
-    </div>
+if(role === "staff"){
 
-    <input class="search" placeholder="Search by reservation ID, passenger, or train...">
+document.getElementById("addPassenger").style.display="none"
 
-    <table>
-        <thead>
-        <tr>
-            <th>Reservation ID</th>
-            <th>Passenger</th>
-            <th>Train</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
+document.getElementById("addTrain").style.display="none"
 
-        <tbody>
-        <tr>
-            <td colspan="6" class="empty">No reservations created yet</td>
-        </tr>
-        </tbody>
-    </table>
-
-</div>
+}
 
 
-<!-- Passengers -->
-<div id="passengers" class="content">
 
-    <div class="section-header">
-        <h2>Passenger Management</h2>
-        <button class="primary">Add Passenger</button>
-    </div>
+// Demo add buttons
 
-</div>
+document.getElementById("addTrain").onclick = function(){
 
+alert("Train Added")
 
-<!-- Trains -->
-<div id="trains" class="content">
+}
 
-    <div class="section-header">
-        <div>
-            <h2>Train Management</h2>
-            <p>Manage train information and seating capacity</p>
-        </div>
+document.getElementById("addPassenger").onclick = function(){
 
-        <button class="primary">Add Train</button>
-    </div>
+alert("Passenger Added")
 
-    <input class="search" placeholder="Search by name, ID, or route...">
+}
 
-    <table>
-        <thead>
-        <tr>
-            <th>Train ID</th>
-            <th>Name</th>
-            <th>Route</th>
-            <th>Total Seats</th>
-            <th>Available</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
+document.getElementById("addReservation").onclick = function(){
 
-        <tbody>
-        <tr>
-            <td colspan="7" class="empty">No trains added yet</td>
-        </tr>
-        </tbody>
-    </table>
-
-</div>
-
-
-<script>function showTab(tabId){
-
-let contents = document.querySelectorAll(".content");
-contents.forEach(c=>{
-c.classList.remove("active");
-});
-
-let tabs = document.querySelectorAll(".tab");
-tabs.forEach(t=>{
-t.classList.remove("active");
-});
-
-document.getElementById(tabId).classList.add("active");
-
-event.target.classList.add("active");
+alert("Reservation Added")
 
 }</script>
+<script src="dashboard.js"></script>
+
 </body>
 </html>
