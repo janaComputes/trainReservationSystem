@@ -146,7 +146,33 @@ Trains
 </table>
 
 </section>
-
+<div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000;">
+    <div style="background:white; padding:30px; border-radius:30px; width:300px; text-align:center;">
+        <h3 id="modalTitle">Add New</h3>
+       
+        <input type="text" id="input1" placeholder="Name/Passenger" style="width:100%; margin:5px -8;border-radius: 30px; padding:10px;">
+        <input type="text" id="input2" placeholder="Detail/Train" style="width:100%; margin:10px 0; padding:10px;">
+        <input type="text" id="input3" placeholder="Date (YYYY-MM-DD)" style="display:none; width:100%; margin:10px 0; padding:10px;">
+       
+        <button id="saveBtn" style="background:#0b1c3f; color:white; width:100%; padding:10px; border:none; border-radius:5px;">Save</button>
+        <button onclick="closeModal()" style="background:gray; color:white; width:100%; padding:10px; border:none; border-radius:5px; margin-top:5px;">Cancel</button>
+    </div>
+</div>
+<!-- <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;">
+    
+    <div style="background:rgba(180, 205, 251, 0.164); padding:30px; border-radius:30px;
+    backdrop-filter: blur(10px);
+    width:300px; text-align:center;">
+        <div><h3 id="modalTitle">Add New</h3></div>
+        <input type="text" id="input1" placeholder="Name" style="width:100%; margin:5px -5px;
+        border-radius: 30px; padding:10px;">
+        <input type="text" id="input2" placeholder="Detail" style="width:100%; margin:5px -5px;
+        border-radius: 30px; padding:10px;">
+        
+        <button id="saveBtn">Save</button>
+        <button onclick="closeModal()" style="background:gray; margin-top:5px;">Cancel</button>
+    </div>
+</div> -->
 <style>body{
 font-family: Arial;
 background:#f4f6f9;
@@ -285,23 +311,93 @@ document.getElementById("addTrain").style.display="none"
 
 // Demo add buttons
 
-document.getElementById("addTrain").onclick = function(){
+// Add Passenger with Pop-up
+document.getElementById("addPassenger").onclick = function() {
+    var name = prompt("Enter Passenger Name:");
+    var email = prompt("Enter Email:");
 
-alert("Train Added")
+    if (name && email) {
+        var table = document.getElementById("passengerTable");
+        var row = table.insertRow();
+        row.insertCell(0).innerText = "P-" + Math.floor(Math.random() * 100);
+        row.insertCell(1).innerText = name;
+        row.insertCell(2).innerText = email;
+        row.insertCell(3).innerHTML = "<button onclick='this.parentElement.parentElement.remove()'>Delete</button>";
+    }
+}
+var currentTable = "";
 
+// Open the Modal
+function openModal(type) {
+    document.getElementById("modal").style.display = "flex";
+    currentTable = type;
+    document.getElementById("modalTitle").innerText = "Add " + type;
 }
 
-document.getElementById("addPassenger").onclick = function(){
+// Close the Modal
+var currentTable = "";
 
-alert("Passenger Added")
+function openModal(type) {
+    document.getElementById("modal").style.display = "flex";
+    currentTable = type;
+    document.getElementById("modalTitle").innerText = "Add " + type;
 
+    // Show the 3rd input ONLY for Reservations
+    if (type === "Reservation") {
+        document.getElementById("input3").style.display = "block";
+    } else {
+        document.getElementById("input3").style.display = "none";
+    }
 }
 
-document.getElementById("addReservation").onclick = function(){
+function closeModal() {
+    document.getElementById("modal").style.display = "none";
+    document.getElementById("input1").value = "";
+    document.getElementById("input2").value = "";
+    document.getElementById("input3").value = "";
+}
 
-alert("Reservation Added")
+document.getElementById("saveBtn").onclick = function() {
+    var val1 = document.getElementById("input1").value;
+    var val2 = document.getElementById("input2").value;
+    var val3 = document.getElementById("input3").value;
 
-}</script>
+    if (val1 && val2) {
+        var table = document.getElementById(currentTable.toLowerCase() + "Table");
+        var row = table.insertRow();
+
+        // If it's a Reservation
+        if (currentTable === "Reservation") {
+            row.insertCell(0).innerText = "R-" + Math.floor(Math.random() * 100);
+            row.insertCell(1).innerText = val1; // Passenger
+            row.insertCell(2).innerText = val2; // Train
+            row.insertCell(3).innerText = val3; // Date
+            row.insertCell(4).innerHTML = "<button onclick='this.parentElement.parentElement.remove()' style='background:red; color:white;'>Delete</button>";
+        }
+        // If it's a Train
+        else if (currentTable === "Train") {
+            row.insertCell(0).innerText = "TR-" + Math.floor(Math.random() * 100);
+            row.insertCell(1).innerText = val1;
+            row.insertCell(2).innerText = val2;
+            row.insertCell(3).innerText = "120";
+            row.insertCell(4).innerText = "Active";
+            row.insertCell(5).innerHTML = "<button onclick='this.parentElement.parentElement.remove()' style='background:red; color:white;'>Delete</button>";
+        }
+        // If it's a Passenger
+        else {
+            row.insertCell(0).innerText = "P-" + Math.floor(Math.random() * 100);
+            row.insertCell(1).innerText = val1;
+            row.insertCell(2).innerText = val2;
+            row.insertCell(3).innerHTML = "<button onclick='this.parentElement.parentElement.remove()' style='background:red; color:white;'>Delete</button>";
+        }
+        closeModal();
+    }
+};
+
+// Connect the buttons
+document.getElementById("addTrain").onclick = function() { openModal("Train"); };
+document.getElementById("addPassenger").onclick = function() { openModal("Passenger"); };
+document.getElementById("addReservation").onclick = function() { openModal("Reservation"); };</script>
 <script src="dashboard.js"></script>
 
 </body>
