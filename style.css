@@ -25,7 +25,7 @@ text-align:center;
 .icon{
 width:60px;
 height:60px;
-background:#2563eb;
+background:#ffffff;
 color:white;
 display:flex;
 align-items:center;
@@ -33,6 +33,12 @@ justify-content:center;
 border-radius:50%;
 font-size:30px;
 margin:0 auto 15px auto;
+width: 100px; 
+height: 100px; 
+object-fit: cover; 
+border-radius: 50%; 
+border: 3px solid #150760; 
+
 }
 
 h2{

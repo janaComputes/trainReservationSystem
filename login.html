@@ -45,7 +45,7 @@ document.getElementById("error").innerText="Invalid login";
 
 <div class="login-container">
 
-<div class="icon">🚆</div>
+<div class="icon"><img src="images/f7dc4aac-6a9c-42e3-b3f6-56ec23995dcf-removebg-preview.png" alt="train logo"style="width: 80px; height: auto"></div>
 
 <h2>Train Reservation System</h2>
 <p class="subtitle">Sign in to manage reservations and passengers</p>
@@ -81,26 +81,32 @@ Don't have an account?
 
 </form>
 <form id="signupForm" style="display:none;">
+    <h3>Create Account</h3>
 
-<h3>Create Account</h3>
+    <label>Username</label>
+    <input type="text" id="newUsername" placeholder="Create a Username" required>
 
-<label>Username</label>
-<input type="text" id="newUsername" required>
+    <label>Password</label>
+    <input type="password" id="newPassword" placeholder="Create a Password" required>
 
-<label>Password</label>
-<input type="password" id="newPassword" required>
+    <div class="role">
+        <p>Register as</p>
+        <label class="radio">
+            <input type="radio" name="newRole" value="staff" checked>
+            Staff
+        </label>
+        <label class="radio">
+            <input type="radio" name="newRole" value="admin">
+            Admin
+        </label>
+    </div>
 
-<button type="submit">Create Account</button>
-<label>Register as</label>
-<select id="newRole" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 5px;">
-    <option value="staff">Staff</option>
-    <option value="admin">Admin</option>
-</select>
-<p class="signup-link">
-Already have an account?
-<a href="#" onclick="showLogin()">Login</a>
-</p>
+    <button type="submit">Create Account</button>
 
+    <p class="signup-link">
+        Already have an account?
+        <a href="#" onclick="showLogin()">Login</a>
+    </p>
 </form>
 
 
