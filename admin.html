@@ -154,7 +154,16 @@
     </div>
     <table>
         <thead>
-            <tr><th>ID</th><th>Passenger</th><th>Train</th><th>Date</th><th>Actions</th></tr>
+            <thead>
+    <tr>
+        <th>Reservation ID</th>
+        <th>Passenger</th>
+        <th>Train</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+</thead>
         </thead>
         <tbody id="reservationTable"></tbody>
     </table>
@@ -167,7 +176,13 @@
     </div>
     <table>
         <thead>
-            <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th></tr>
+<tr>
+    <th>Passenger ID</th>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Phone</th>
+    <th>Actions</th>
+</tr>
         </thead>
         <tbody id="passengerTable"></tbody>
     </table>
@@ -180,7 +195,17 @@
     </div>
     <table>
         <thead>
-            <tr><th>Train ID</th><th>Name</th><th>Route</th><th>Seats</th><th>Status</th><th>Actions</th></tr>
+            <thead>
+    <tr>
+        <th>Train ID</th>
+        <th>Name</th>
+        <th>Route</th>
+        <th>Total Seats</th>
+        <th>Available</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+</thead>
         </thead>
         <tbody id="trainTable"></tbody>
     </table>
@@ -275,27 +300,40 @@ tabs.forEach(tab => {
     // 5. MODAL LOGIC
     var currentTable = "";
 
-   function openModal(type) {
+  function openModal(type) {
     document.getElementById("modal").style.display = "flex";
     currentTable = type;
     document.getElementById("modalTitle").innerText = "Add " + type;
     
-    // Reset all inputs to hidden/default first
+    // Reset inputs
     document.getElementById("input3").style.display = "none";
     document.getElementById("inputSeats").style.display = "none";
     document.getElementById("inputPhone").style.display = "none";
 
     if (type === "Passenger") {
         document.getElementById("input1").placeholder = "Passenger Name";
-        document.getElementById("input2").placeholder = "Email Address"; // <--- This sets the email label
+
+        document.getElementById("input2").placeholder = "Email Address";
+        document.getElementById("input2").type = "email";
+
         document.getElementById("inputPhone").style.display = "inline-block";
-    } else if (type === "Train") {
+
+    } 
+    else if (type === "Train") {
         document.getElementById("input1").placeholder = "Train Name";
+
         document.getElementById("input2").placeholder = "Train Route";
+        document.getElementById("input2").type = "text";
+
         document.getElementById("inputSeats").style.display = "inline-block";
-    } else if (type === "Reservation") {
+
+    } 
+    else if (type === "Reservation") {
         document.getElementById("input1").placeholder = "Passenger Name";
+
         document.getElementById("input2").placeholder = "Train Name";
+        document.getElementById("input2").type = "text";
+
         document.getElementById("input3").style.display = "inline-block";
     }
 }
@@ -349,6 +387,33 @@ tabs.forEach(tab => {
 }
 
     if (val1 && val2) {
+        if (currentTable === "Reservation") {
+
+    var trainRows = document.querySelectorAll("#trainTable tr");
+
+    trainRows.forEach(row => {
+
+        if (row.cells[1].innerText === val2) {
+
+            var available = parseInt(row.cells[4].innerText);
+
+            if (available === 0) {
+                alert("Train is Full");
+                return;
+            }
+
+            available--;
+
+            row.cells[4].innerText = available;
+
+            if (available === 0) {
+                row.cells[5].innerText = "Full";
+            }
+
+        }
+
+    });
+}
         var tableId = currentTable.toLowerCase() + "Table";
         var table = document.getElementById(tableId);
         var row = table.insertRow();
@@ -359,14 +424,26 @@ tabs.forEach(tab => {
         row.insertCell(0).innerText = prefix + Math.floor(Math.random() * 100);
         row.insertCell(1).innerText = val1;
         row.insertCell(2).innerText = val2;
+if (currentTable === "Train") {
 
+    var seats = document.getElementById("inputSeats").value;
+
+    row.insertCell(3).innerText = seats; // total seats
+    row.insertCell(4).innerText = seats; // available seats
+
+    var status = seats > 0 ? "Available" : "Full";
+
+    row.insertCell(5).innerText = status;
+}
         if (currentTable === "Passenger") {
             row.insertCell(3).innerText = valPhone; 
         } 
         
 
         var actionCell = row.insertCell(-1);
-        actionCell.innerHTML = "<button style='background:red;' onclick='this.parentElement.parentElement.remove(); saveAllData();'>Delete</button>";
+        actionCell.innerHTML =
+"<button onclick='editRow(this)'>Edit</button> " +
+"<button onclick='deleteRow(this)' style='background:red;'>Delete</button>";
         
         closeModal();
         saveAllData(); 
@@ -376,7 +453,22 @@ tabs.forEach(tab => {
     document.getElementById("addTrain").onclick = function() { openModal("Train"); }
     document.getElementById("addPassenger").onclick = function() { openModal("Passenger"); }
     document.getElementById("addReservation").onclick = function() { openModal("Reservation"); }
+function deleteRow(btn) {
+    btn.parentElement.parentElement.remove();
+    saveAllData();
+}
 
+function editRow(btn) {
+
+    var row = btn.parentElement.parentElement;
+
+    document.getElementById("input1").value = row.cells[1].innerText;
+    document.getElementById("input2").value = row.cells[2].innerText;
+
+    openModal("Train");
+
+    row.remove();
+}
 </script>
 </body>
 </html>
