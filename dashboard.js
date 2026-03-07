@@ -2,9 +2,8 @@
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
 if (!currentUser) {
-    window.location.replace("login.html");
+window.location.replace("login.html");
 }
-
 
 
 if(!currentUser){

@@ -215,11 +215,10 @@
     document.getElementById("roleText").innerText = "Logged in as: " + (role || "Guest");
 
     // 2. LOGOUT (Fixed to not clear table data)
-    document.getElementById("logoutBtn").onclick = function() {
-        localStorage.removeItem("role"); 
-        window.location.href = "login.html";
-    }
-
+   document.getElementById("logoutBtn").onclick = function() {
+    localStorage.removeItem("role"); // Deletes the "Key" to the dashboard
+    window.location.href = "login.html";
+};
     // 3. TABS LOGIC
     // Tabs Logic - Updated to save choice
 const tabs = document.querySelectorAll(".tab");

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,8 +6,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login</title>
 <link rel="stylesheet" href="style.css">
-</head>
 
+</head>
+<script>
+
+const loginForm = document.getElementById("loginForm");
+
+loginForm.addEventListener("submit", function(e){
+
+e.preventDefault();
+
+const username = document.getElementById("username").value;
+const password = document.getElementById("password").value;
+
+const users = JSON.parse(localStorage.getItem("users")) || [];
+
+const user = users.find(u => 
+u.username === username && u.password === password
+);
+
+if(user){
+
+localStorage.setItem("currentUser", JSON.stringify(user));
+localStorage.setItem("role", user.role);
+
+window.location.href = "dashboard.html";
+
+}else{
+
+document.getElementById("error").innerText="Invalid login";
+
+}
+
+});
+
+</script>
 <body>
 
 <div class="login-container">
@@ -57,7 +91,11 @@ Don't have an account?
 <input type="password" id="newPassword" required>
 
 <button type="submit">Create Account</button>
-
+<label>Register as</label>
+<select id="newRole" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 5px;">
+    <option value="staff">Staff</option>
+    <option value="admin">Admin</option>
+</select>
 <p class="signup-link">
 Already have an account?
 <a href="#" onclick="showLogin()">Login</a>
@@ -68,7 +106,9 @@ Already have an account?
 
 </div>
 <script>
-
+   
+    
+localStorage.setItem("currentUser", JSON.stringify(user));
 function showSignup(){
 document.getElementById("loginForm").style.display="none";
 document.getElementById("signupForm").style.display="block";
@@ -80,6 +120,7 @@ document.getElementById("loginForm").style.display="block";
 }
 
 </script>
+
 <script src="users.js"></script>
 <script src="auth.js"></script>
 
