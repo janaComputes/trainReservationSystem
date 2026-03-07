@@ -1,308 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Train Reservation System</title>
-<!-- <link rel="stylesheet" href="dashboard.css"> -->
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Reservation System - Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+        }
 
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
+            gap: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border: none;
+            background: #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #0b1c3f;
+            color: white;
+        }
+
+        .content {
+            display: none;
+            width: 80%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .sectionHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background: #0b1c3f;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        /* Modal Styles */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-box input {
+            width: 90%;
+            margin: 10px 0;
+            border-radius: 30px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
 <body>
 
 <header class="topbar">
-
-<div class="logo">
-🚆 Train Reservation System
-<p id="roleText"></p>
-</div>
-
-<button id="logoutBtn">Logout</button>
-
+    <div class="logo">
+        🚆 Train Reservation System
+        <p id="roleText" style="font-size: 12px; color: gray; margin: 0;"></p>
+    </div>
+    <button id="logoutBtn">Logout</button>
 </header>
 
-
 <nav class="tabs">
-
-<button class="tab active" data-tab="reservations">
-Reservations
-</button>
-
-<button class="tab" data-tab="passengers">
-Passengers
-</button>
-
-<button class="tab" data-tab="trains">
-Trains
-</button>
-
+    <button class="tab active" data-tab="reservations">Reservations</button>
+    <button class="tab" data-tab="passengers">Passengers</button>
+    <button class="tab" data-tab="trains">Trains</button>
 </nav>
 
-
-
-<!-- Reservations -->
-
 <section id="reservations" class="content active">
-
-<div class="sectionHeader">
-<h2>Reservations</h2>
-
-<button id="addReservation">Add Reservation</button>
-</div>
-
-<table>
-
-<thead>
-<tr>
-<th>ID</th>
-<th>Passenger</th>
-<th>Train</th>
-<th>Date</th>
-<th>Actions</th>
-</tr>
-</thead>
-
-<tbody id="reservationTable">
-
-<tr>
-<td colspan="5">No reservations yet</td>
-</tr>
-
-</tbody>
-
-</table>
-
+    <div class="sectionHeader">
+        <h2>Reservations</h2>
+        <button id="addReservation">Add Reservation</button>
+    </div>
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Passenger</th><th>Train</th><th>Date</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="reservationTable"></tbody>
+    </table>
 </section>
-
-
-
-<!-- Passengers -->
 
 <section id="passengers" class="content">
-
-<div class="sectionHeader">
-<h2>Passengers</h2>
-
-<button id="addPassenger">Add Passenger</button>
-</div>
-
-<table>
-
-<thead>
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Email</th>
-<th>Actions</th>
-</tr>
-</thead>
-
-<tbody id="passengerTable">
-
-<tr>
-<td colspan="4">No passengers added</td>
-</tr>
-
-</tbody>
-
-</table>
-
+    <div class="sectionHeader">
+        <h2>Passengers</h2>
+        <button id="addPassenger">Add Passenger</button>
+    </div>
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="passengerTable"></tbody>
+    </table>
 </section>
-
-
-
-<!-- Trains -->
 
 <section id="trains" class="content">
-
-<div class="sectionHeader">
-<h2>Train Management</h2>
-
-<button id="addTrain">Add Train</button>
-</div>
-
-<table>
-
-<thead>
-
-<tr>
-<th>Train ID</th>
-<th>Name</th>
-<th>Route</th>
-<th>Total Seats</th>
-<th>Status</th>
-<th>Actions</th>
-</tr>
-
-</thead>
-
-<tbody id="trainTable">
-
-<tr>
-<td colspan="6">No trains added yet</td>
-</tr>
-
-</tbody>
-
-</table>
-
+    <div class="sectionHeader">
+        <h2>Train Management</h2>
+        <button id="addTrain">Add Train</button>
+    </div>
+    <table>
+        <thead>
+            <tr><th>Train ID</th><th>Name</th><th>Route</th><th>Seats</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="trainTable"></tbody>
+    </table>
 </section>
 
-<style>body{
-font-family: Arial;
-background:#f4f6f9;
-margin:0;
-}
+<div id="modal">
+    <div class="modal-box">
+        <h3 id="modalTitle">Add New</h3>
+        <input type="text" id="input1" placeholder="Name">
+        <input type="text" id="input2" placeholder="Detail">
+        <input type="date" id="input3" style="display:none; width: 90%; margin: 10px 0; border-radius: 30px; padding: 10px; border: 1px solid #ccc;">
+        
+        <button id="saveBtn" style="width: 100%; margin-top: 10px;">Save</button>
+        <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
+    </div>
+</div>
 
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:white;
-padding:15px 40px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
+<script src="storage.js"></script>
+<script>
+    // 1. LOAD DATA ON START
+    window.onload = function() {
+        if (typeof loadAllData === "function") {
+            loadAllData();
+        }
+    };
+    const savedTab = localStorage.getItem("activeTab");
+    const allTabs = document.querySelectorAll(".tab");
+    const allContents = document.querySelectorAll(".content");
 
-.logo{
-font-size:20px;
-font-weight:bold;
-}
+    if (savedTab) {
+        // Remove active class from the default tab
+        allTabs.forEach(t => t.classList.remove("active"));
+        allContents.forEach(c => c.classList.remove("active"));
 
-.tabs{
-display:flex;
-justify-content:center;
-margin:20px;
-gap:10px;
-}
+        // Activate the saved tab
+        const targetButton = document.querySelector(`[data-tab="${savedTab}"]`);
+        const targetContent = document.getElementById(savedTab);
 
-.tab{
-padding:10px 20px;
-border:none;
-background:#ddd;
-border-radius:20px;
-cursor:pointer;
-}
+        if (targetButton && targetContent) {
+            targetButton.classList.add("active");
+            targetContent.classList.add("active");
+        }
+    }
 
-.tab.active{
-background:#0b1c3f;
-color:white;
-}
+    const role = localStorage.getItem("role");
+    document.getElementById("roleText").innerText = "Logged in as: " + (role || "Guest");
 
-.content{
-display:none;
-width:80%;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
+    // 2. LOGOUT (Fixed to not clear table data)
+    document.getElementById("logoutBtn").onclick = function() {
+        localStorage.removeItem("role"); 
+        window.location.href = "login.html";
+    }
 
-.content.active{
-display:block;
-}
-
-.sectionHeader{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:15px;
-}
-
-button{
-background:#0b1c3f;
-color:white;
-border:none;
-padding:8px 15px;
-border-radius:5px;
-cursor:pointer;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-th,td{
-padding:10px;
-border-bottom:1px solid #eee;
-text-align:left;
-}</style>
-<script>const role = localStorage.getItem("role")
-
-const roleText = document.getElementById("roleText")
-
-roleText.innerText = "Logged in as: " + role
-
-
-
-// logout
-
-document.getElementById("logoutBtn").onclick = function(){
-
-localStorage.clear()
-
-window.location.href="login.html"
-
-}
-
-
-
-// Tabs
-
-const tabs = document.querySelectorAll(".tab")
-
-const contents = document.querySelectorAll(".content")
+    // 3. TABS LOGIC
+    // Tabs Logic - Updated to save choice
+const tabs = document.querySelectorAll(".tab");
+const contents = document.querySelectorAll(".content");
 
 tabs.forEach(tab => {
+    tab.onclick = () => {
+        const targetTab = tab.dataset.tab;
 
-tab.onclick = () => {
+        // Remove active class from all
+        tabs.forEach(t => t.classList.remove("active"));
+        contents.forEach(c => c.classList.remove("active"));
 
-tabs.forEach(t=>t.classList.remove("active"))
+        // Add active class to clicked tab
+        tab.classList.add("active");
+        document.getElementById(targetTab).classList.add("active");
 
-contents.forEach(c=>c.classList.remove("active"))
+        // SAVE the current tab name (e.g., "passengers")
+        localStorage.setItem("activeTab", targetTab);
+    }
+});
 
-tab.classList.add("active")
+    // 4. ROLE PERMISSIONS
+    if(role === "staff") {
+        document.getElementById("addPassenger").style.display = "none";
+        document.getElementById("addTrain").style.display = "none";
+    }
 
-document.getElementById(tab.dataset.tab).classList.add("active")
+    // 5. MODAL LOGIC
+    var currentTable = "";
 
-}
+    function openModal(type) {
+        document.getElementById("modal").style.display = "flex";
+        currentTable = type;
+        document.getElementById("modalTitle").innerText = "Add " + type;
+        
+        // Show date picker only for Reservations
+        document.getElementById("input3").style.display = (type === "Reservation") ? "inline-block" : "none";
+    }
 
-})
+    function closeModal() {
+        document.getElementById("modal").style.display = "none";
+        document.getElementById("input1").value = "";
+        document.getElementById("input2").value = "";
+        document.getElementById("input3").value = "";
+    }
 
+    document.getElementById("saveBtn").onclick = function() {
+        var val1 = document.getElementById("input1").value;
+        var val2 = document.getElementById("input2").value;
+        var val3 = document.getElementById("input3").value;
 
+        if (val1 && val2) {
+            var tableId = currentTable.toLowerCase() + "Table";
+            var table = document.getElementById(tableId);
 
-// Role permissions
+            if (table.rows.length === 1 && table.rows[0].cells.length < 2) {
+            table.innerHTML = "";
+        }
+            var row = table.insertRow();
 
-if(role === "staff"){
+            // Smart ID
+            var prefix = currentTable === "Train" ? "TR-" : (currentTable === "Passenger" ? "P-" : "R-");
+            row.insertCell(0).innerText = prefix + Math.floor(Math.random() * 100);
+            
+            row.insertCell(1).innerText = val1;
+            row.insertCell(2).innerText = val2;
 
-document.getElementById("addPassenger").style.display="none"
+            if (currentTable === "Reservation") {
+                row.insertCell(3).innerText = val3 || "No Date";
+            } else if (currentTable === "Train") {
+                row.insertCell(3).innerText = "100";
+                row.insertCell(4).innerText = "Active";
+            } else {
+                // Passenger only has 4 columns total, ID is 0, Name is 1, Email is 2, Action is 3
+            }
 
-document.getElementById("addTrain").style.display="none"
+            // Delete Button (Saves after removal)
+            var actionCell = row.insertCell(-1);
+            actionCell.innerHTML = "<button style='background:red;' onclick='this.parentElement.parentElement.remove(); saveAllData();'>Delete</button>";
+            
+            closeModal();
+            saveAllData(); 
+        }
+    }
 
-}
+    // 6. CONNECT BUTTONS
+    document.getElementById("addTrain").onclick = function() { openModal("Train"); }
+    document.getElementById("addPassenger").onclick = function() { openModal("Passenger"); }
+    document.getElementById("addReservation").onclick = function() { openModal("Reservation"); }
 
-
-
-// Demo add buttons
-
-document.getElementById("addTrain").onclick = function(){
-
-alert("Train Added")
-
-}
-
-document.getElementById("addPassenger").onclick = function(){
-
-alert("Passenger Added")
-
-}
-
-document.getElementById("addReservation").onclick = function(){
-
-alert("Reservation Added")
-
-}</script>
-<script src="dashboard.js"></script>
-
+</script>
 </body>
 </html>
