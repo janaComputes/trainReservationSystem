@@ -172,7 +172,6 @@
     </table>
 </section>
 
-<<<<<<< HEAD
 <div id="modal">
     <div class="modal-box">
         <h3 id="modalTitle">Add New</h3>
@@ -184,13 +183,6 @@
         <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
     </div>
 </div>
-=======
-<style>body{
-font-family: Arial;
-background:#f4f6f9;
-margin:0;
-}
->>>>>>> 067dd226b29d1c8d2f5ebfe74e762febb56450c0
 
 <script src="storage.js"></script>
 <script>
@@ -245,7 +237,6 @@ tabs.forEach(tab => {
         tab.classList.add("active");
         document.getElementById(targetTab).classList.add("active");
 
-<<<<<<< HEAD
         // SAVE the current tab name (e.g., "passengers")
         localStorage.setItem("activeTab", targetTab);
     }
@@ -319,52 +310,6 @@ tabs.forEach(tab => {
     document.getElementById("addTrain").onclick = function() { openModal("Train"); }
     document.getElementById("addPassenger").onclick = function() { openModal("Passenger"); }
     document.getElementById("addReservation").onclick = function() { openModal("Reservation"); }
-=======
-contents.forEach(c=>c.classList.remove("active"))
-
-tab.classList.add("active")
-
-document.getElementById(tab.dataset.tab).classList.add("active")
-
-}
-
-})
-
-
-
-// Role permissions
-
-if(role === "staff"){
-
-document.getElementById("addPassenger").style.display="none"
-
-document.getElementById("addTrain").style.display="none"
-
-}
-
-
-
-// Demo add buttons
-
-document.getElementById("addTrain").onclick = function(){
-
-alert("Train Added")
-
-}
-
-document.getElementById("addPassenger").onclick = function(){
-
-alert("Passenger Added")
-
-}
-
-document.getElementById("addReservation").onclick = function(){
-
-alert("Reservation Added")
-
-}</script>
-<script src="dashboard.js"></script>
->>>>>>> 067dd226b29d1c8d2f5ebfe74e762febb56450c0
 
 </script>
 </body>

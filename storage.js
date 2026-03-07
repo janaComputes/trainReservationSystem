@@ -17,8 +17,4 @@ function loadAllData() {
     if (localStorage.getItem("reservations")) {
         document.getElementById("reservationTable").innerHTML = localStorage.getItem("reservations");
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 067dd226b29d1c8d2f5ebfe74e762febb56450c0
