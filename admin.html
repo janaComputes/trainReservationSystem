@@ -127,15 +127,20 @@
     </style>
 </head>
 <body>
-
 <header class="topbar">
-    <div class="logo">
-        🚆 Train Reservation System
-        <p id="roleText" style="font-size: 12px; color: gray; margin: 0;"></p>
+    <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+        <img src="images/f7dc4aac-6a9c-42e3-b3f6-56ec23995dcf-removebg-preview.png" 
+             alt="Logo" 
+             style="width: 30px; height: 30px; border-radius: 50%; object-fit: contain;
+             border: 2px solid #0b1c3f">
+        
+        <div>
+            <span style="display: block; font-weight: bold;">Train Reservation System</span>
+            <p id="roleText" style="font-size: 12px; color: gray; margin: 0;"></p>
+        </div>
     </div>
     <button id="logoutBtn">Logout</button>
 </header>
-
 <nav class="tabs">
     <button class="tab active" data-tab="reservations">Reservations</button>
     <button class="tab" data-tab="passengers">Passengers</button>
@@ -162,7 +167,7 @@
     </div>
     <table>
         <thead>
-            <tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr>
+            <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th></tr>
         </thead>
         <tbody id="passengerTable"></tbody>
     </table>
@@ -185,7 +190,17 @@
     <div class="modal-box">
         <h3 id="modalTitle">Add New</h3>
         <input type="text" id="input1" placeholder="Name">
-        <input type="text" id="input2" placeholder="Detail">
+
+        <input type="email" id="input2" placeholder="Email Address" 
+       style="width: 90%; margin: 10px 0; border-radius: 30px; padding: 10px; border: 1px solid #ccc;">
+        
+        <input type="tel" id="inputPhone" 
+       placeholder="Phone Number (10 digits)" 
+       pattern="[0-9]{10}" 
+       title="Please enter exactly 10 digits"
+       style="display:none; width: 90%; margin: 10px 0; border-radius: 30px; padding: 10px; border: 1px solid #ccc;">
+        
+        <input type="number" id="inputSeats" placeholder="Total Seats" style="display:none; width: 90%; margin: 10px 0; border-radius: 30px; padding: 10px; border: 1px solid #ccc;">
         <input type="date" id="input3" style="display:none; width: 90%; margin: 10px 0; border-radius: 30px; padding: 10px; border: 1px solid #ccc;">
         
         <button id="saveBtn" style="width: 100%; margin-top: 10px;">Save</button>
@@ -260,61 +275,103 @@ tabs.forEach(tab => {
     // 5. MODAL LOGIC
     var currentTable = "";
 
-    function openModal(type) {
-        document.getElementById("modal").style.display = "flex";
-        currentTable = type;
-        document.getElementById("modalTitle").innerText = "Add " + type;
-        
-        // Show date picker only for Reservations
-        document.getElementById("input3").style.display = (type === "Reservation") ? "inline-block" : "none";
-    }
+   function openModal(type) {
+    document.getElementById("modal").style.display = "flex";
+    currentTable = type;
+    document.getElementById("modalTitle").innerText = "Add " + type;
+    
+    // Reset all inputs to hidden/default first
+    document.getElementById("input3").style.display = "none";
+    document.getElementById("inputSeats").style.display = "none";
+    document.getElementById("inputPhone").style.display = "none";
 
-    function closeModal() {
-        document.getElementById("modal").style.display = "none";
-        document.getElementById("input1").value = "";
-        document.getElementById("input2").value = "";
-        document.getElementById("input3").value = "";
+    if (type === "Passenger") {
+        document.getElementById("input1").placeholder = "Passenger Name";
+        document.getElementById("input2").placeholder = "Email Address"; // <--- This sets the email label
+        document.getElementById("inputPhone").style.display = "inline-block";
+    } else if (type === "Train") {
+        document.getElementById("input1").placeholder = "Train Name";
+        document.getElementById("input2").placeholder = "Train Route";
+        document.getElementById("inputSeats").style.display = "inline-block";
+    } else if (type === "Reservation") {
+        document.getElementById("input1").placeholder = "Passenger Name";
+        document.getElementById("input2").placeholder = "Train Name";
+        document.getElementById("input3").style.display = "inline-block";
     }
+}
+
+  function closeModal() {
+    // 1. Hide the main modal container
+    document.getElementById("modal").style.display = "none";
+
+    // 2. Clear all text/number/date values
+    document.getElementById("input1").value = "";
+    document.getElementById("input2").value = "";
+    document.getElementById("input3").value = "";
+    document.getElementById("inputSeats").value = "";
+    document.getElementById("inputPhone").value = "";
+
+    // 3. Reset all conditional display styles to 'none'
+    // This ensures that when you open a different modal type, 
+    // the previous type's fields are hidden.
+    document.getElementById("input3").style.display = "none";
+    document.getElementById("inputSeats").style.display = "none";
+    document.getElementById("inputPhone").style.display = "none";
+    
+    // 4. (Optional) Clear any error messages that might be visible
+    const errorMsg = document.getElementById("error");
+    if (errorMsg) {
+        errorMsg.innerText = "";
+    }
+}
 
     document.getElementById("saveBtn").onclick = function() {
-        var val1 = document.getElementById("input1").value;
-        var val2 = document.getElementById("input2").value;
-        var val3 = document.getElementById("input3").value;
+    var val1 = document.getElementById("input1").value;
+    var val2 = document.getElementById("input2").value;
+    var valPhone = document.getElementById("inputPhone").value;
 
-        if (val1 && val2) {
-            var tableId = currentTable.toLowerCase() + "Table";
-            var table = document.getElementById(tableId);
-
-            if (table.rows.length === 1 && table.rows[0].cells.length < 2) {
-            table.innerHTML = "";
+    // --- NEW VALIDATION FOR PASSENGER ---
+    if (currentTable === "Passenger") {
+        // This checks if the input is NOT exactly 10 digits
+        const phonePattern = /^[0-9]{10}$/;
+        if (!phonePattern.test(valPhone)) {
+            alert("Error: Phone number must be exactly 10 digits.");
+            return; // Stops the function here so no row is added
         }
-            var row = table.insertRow();
+        
+    const valEmail = document.getElementById("input2").value;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Standard email check
 
-            // Smart ID
-            var prefix = currentTable === "Train" ? "TR-" : (currentTable === "Passenger" ? "P-" : "R-");
-            row.insertCell(0).innerText = prefix + Math.floor(Math.random() * 100);
-            
-            row.insertCell(1).innerText = val1;
-            row.insertCell(2).innerText = val2;
-
-            if (currentTable === "Reservation") {
-                row.insertCell(3).innerText = val3 || "No Date";
-            } else if (currentTable === "Train") {
-                row.insertCell(3).innerText = "100";
-                row.insertCell(4).innerText = "Active";
-            } else {
-                // Passenger only has 4 columns total, ID is 0, Name is 1, Email is 2, Action is 3
-            }
-
-            // Delete Button (Saves after removal)
-            var actionCell = row.insertCell(-1);
-            actionCell.innerHTML = "<button style='background:red;' onclick='this.parentElement.parentElement.remove(); saveAllData();'>Delete</button>";
-            
-            closeModal();
-            saveAllData(); 
-        }
+    if (!emailPattern.test(valEmail)) {
+        alert("Error: Please enter a valid email address (e.g., name@example.com).");
+        return; // Stops the saving process
     }
+}
 
+    if (val1 && val2) {
+        var tableId = currentTable.toLowerCase() + "Table";
+        var table = document.getElementById(tableId);
+        var row = table.insertRow();
+        
+        // ... rest of your existing logic to insert cells ...
+        
+        var prefix = currentTable === "Train" ? "TR-" : (currentTable === "Passenger" ? "P-" : "R-");
+        row.insertCell(0).innerText = prefix + Math.floor(Math.random() * 100);
+        row.insertCell(1).innerText = val1;
+        row.insertCell(2).innerText = val2;
+
+        if (currentTable === "Passenger") {
+            row.insertCell(3).innerText = valPhone; 
+        } 
+        
+
+        var actionCell = row.insertCell(-1);
+        actionCell.innerHTML = "<button style='background:red;' onclick='this.parentElement.parentElement.remove(); saveAllData();'>Delete</button>";
+        
+        closeModal();
+        saveAllData(); 
+    }
+}
     // 6. CONNECT BUTTONS
     document.getElementById("addTrain").onclick = function() { openModal("Train"); }
     document.getElementById("addPassenger").onclick = function() { openModal("Passenger"); }
