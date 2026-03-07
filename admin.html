@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Train Reservation System - Admin</title>
+    <script>
+    // 1. Check if the user has a role
+    const userRole = localStorage.getItem("role");
+
+    // 2. ONLY redirect if there is NO role AND we aren't already on the login page
+    if (!userRole && !window.location.href.includes("login.html")) {
+        window.location.href = "login.html";
+    }
+</script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -215,10 +224,11 @@
     document.getElementById("roleText").innerText = "Logged in as: " + (role || "Guest");
 
     // 2. LOGOUT (Fixed to not clear table data)
-   document.getElementById("logoutBtn").onclick = function() {
-    localStorage.removeItem("role"); // Deletes the "Key" to the dashboard
-    window.location.href = "login.html";
-};
+    document.getElementById("logoutBtn").onclick = function() {
+        localStorage.removeItem("role"); 
+        window.location.href = "login.html";
+    }
+
     // 3. TABS LOGIC
     // Tabs Logic - Updated to save choice
 const tabs = document.querySelectorAll(".tab");
