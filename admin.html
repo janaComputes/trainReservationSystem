@@ -88,7 +88,8 @@
         <button id="addTrain">Add Train</button>
     </div>
     <table>
-        <thead><tr><th>ID</th><th>Name</th><th>Route</th><th>Seats</th><th>Available</th><th>Status</th><th>Actions</th></tr></thead>
+        
+        <thead><tr><th>Train ID</th><th>Name</th><th>Route</th><th>Total Seats</th><th>Available</th><th>Status</th><th>Departure Time</th><th>Arrival Time</th><th>Ticket Price</th><th>Actions</th></tr></thead>
         <tbody id="trainTable"></tbody>
     </table>
 </section>
@@ -105,18 +106,30 @@
 </section>
 
 <div id="modal">
-    <div class="modal-box">
-        <h3 id="modalTitle">Add New</h3>
-        <input type="text" id="input1" placeholder="Name">
-        <select id="passengerSelect" style="display:none;"></select>
-        <input type="text" id="input2" placeholder="Detail">
-        <select id="trainSelect" style="display:none;"></select>
-        <input type="tel" id="inputPhone" placeholder="Phone" style="display:none;">
-        <input type="number" id="inputSeats" placeholder="Total Seats" min="1" style="display:none;">
-        <input type="date" id="input3" style="display:none;">
-        <button id="saveBtn" style="width: 100%; margin-top: 10px;">Save</button>
-        <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
-    </div>
+  <div class="modal-box">
+    <h3 id="modalTitle">Add New</h3>
+
+    <!-- للقطارات والركاب -->
+    <input type="text" id="input1" placeholder="Name">
+    
+    <!-- للـ Reservation فقط -->
+    <select id="passengerSelect" style="display:none;"></select>
+    <select id="trainSelect" style="display:none;"></select>
+    <input type="date" id="input3" style="display:none;">
+
+    <!-- للركاب -->
+    <input type="text" id="input2" placeholder="Detail">
+    <input type="tel" id="inputPhone" placeholder="Phone" style="display:none;">
+
+    <!-- للقطارات -->
+    <input type="number" id="inputSeats" placeholder="Total Seats" min="1" style="display:none;">
+    <input type="time" id="inputDeparture" placeholder="Departure Time" style="display:none;">
+    <input type="time" id="inputArrival" placeholder="Arrival Time" style="display:none;">
+    <input type="number" id="inputPrice" placeholder="Ticket Price (SR)" min="0" style="display:none;">
+
+    <button id="saveBtn" style="width: 100%; margin-top: 10px;">Save</button>
+    <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
+  </div>
 </div>
 
 <script src="storage.js"></script>
@@ -129,7 +142,7 @@
         const role = localStorage.getItem("role");
         document.getElementById("roleText").innerText = "Logged in as: " + (role || "Guest");
         if(role === "staff") {
-            document.getElementById("addPassenger").style.display = "none";
+            // document.getElementById("addPassenger").style.display = "none";
             document.getElementById("addTrain").style.display = "none";
         }
     };
@@ -146,32 +159,41 @@
     });
 
     function openModal(type) {
-        document.getElementById("modal").style.display = "flex";
-        currentTable = type;
-        document.getElementById("modalTitle").innerText = "Add " + type;
-        const ids = ["input1", "input2", "input3", "inputPhone", "inputSeats", "passengerSelect", "trainSelect"];
-        ids.forEach(id => document.getElementById(id).style.display = "none");
+    document.getElementById("modal").style.display = "flex";
+    currentTable = type;
+    document.getElementById("modalTitle").innerText = "Add " + type;
 
-        if (type === "Reservation") {
-            populateDropdowns();
-            document.getElementById("input3").value = new Date().toISOString().split('T')[0];
-            document.getElementById("passengerSelect").style.display = "block";
-            document.getElementById("trainSelect").style.display = "block";
-            document.getElementById("input3").style.display = "block";
-        } else if (type === "Passenger") {
-            document.getElementById("input1").style.display = "block";
-            document.getElementById("input1").placeholder = "Name";
-            document.getElementById("input2").style.display = "block";
-            document.getElementById("input2").placeholder = "Email";
-            document.getElementById("inputPhone").style.display = "block";
-        } else if (type === "Train") {
-            document.getElementById("input1").style.display = "block";
-            document.getElementById("input1").placeholder = "Train Name";
-            document.getElementById("input2").style.display = "block";
-            document.getElementById("input2").placeholder = "Route";
-            document.getElementById("inputSeats").style.display = "block";
-        }
+    // اخفاء كل الحقول اول شي
+    const allFields = ["input1","input2","input3","inputPhone","inputSeats","inputDeparture","inputArrival","inputPrice","passengerSelect","trainSelect"];
+    allFields.forEach(id => document.getElementById(id).style.display = "none");
+
+    if (type === "Reservation") {
+        populateDropdowns();
+        document.getElementById("input3").value = new Date().toISOString().split('T')[0];
+        document.getElementById("passengerSelect").style.display = "block";
+        document.getElementById("trainSelect").style.display = "block";
+        document.getElementById("input3").style.display = "block";
+    } 
+    else if (type === "Passenger") {
+        document.getElementById("input1").style.display = "block";
+        document.getElementById("input1").placeholder = "Name";
+        document.getElementById("input2").style.display = "block";
+        document.getElementById("input2").placeholder = "Email";
+        document.getElementById("inputPhone").style.display = "block";
+    } 
+    else if (type === "Train") {
+        document.getElementById("input1").style.display = "block";
+        document.getElementById("input1").placeholder = "Train Name";
+
+        document.getElementById("input2").style.display = "block";
+        document.getElementById("input2").placeholder = "Route";
+
+        document.getElementById("inputSeats").style.display = "block";
+        document.getElementById("inputDeparture").style.display = "block";
+        document.getElementById("inputArrival").style.display = "block";
+        document.getElementById("inputPrice").style.display = "block";
     }
+}
 
     function closeModal() {
         document.getElementById("modal").style.display = "none";
@@ -230,11 +252,36 @@
         row.insertCell(1).innerText = v1;
         row.insertCell(2).innerText = v2;
 
-        if (currentTable === "Train") {
-            row.insertCell(3).innerText = vSeats;
-            row.insertCell(4).innerText = vSeats;
-            row.insertCell(5).innerText = "Available";
-        } else if (currentTable === "Passenger") {
+       if (currentTable === "Train") {
+    const departure = document.getElementById("inputDeparture").value;
+    const arrival = document.getElementById("inputArrival").value;
+    const price = parseFloat(document.getElementById("inputPrice").value);
+
+    // التحقق من صحة البيانات
+    if (!v1 || !v2 || !vSeats || !departure || !arrival || isNaN(price)) {
+        alert("Please fill all train fields correctly!");
+        return;
+    }
+    if (parseInt(vSeats) <= 0) { alert("Total seats must be greater than 0."); return; }
+    if (price < 0) { alert("Ticket price cannot be negative."); return; }
+    if (arrival <= departure) { alert("Arrival time must be after departure time."); return; }
+
+    // إدراج البيانات في الصف
+    row.insertCell(0).innerText = uniqueID;
+    row.insertCell(1).innerText = v1; // Name
+    row.insertCell(2).innerText = v2; // Route
+    row.insertCell(3).innerText = vSeats; // Total Seats
+    row.insertCell(4).innerText = vSeats; // Available Seats
+    row.insertCell(5).innerText = "Available"; // Status
+    row.insertCell(6).innerText = departure;
+    row.insertCell(7).innerText = arrival;
+    row.insertCell(8).innerText = price.toFixed(2) + " SR";
+
+    const actionCell = row.insertCell(9);
+    actionCell.innerHTML = `<button onclick="editRow(this)" style="background:#0b1c3f; margin-right:5px;">Edit</button>
+                            <button onclick="deleteRow(this)" style="background:#cc0000;">Delete</button>`;
+}
+         else if (currentTable === "Passenger") {
             row.insertCell(3).innerText = vPhone;
         } else {
             row.insertCell(3).innerText = vDate;
