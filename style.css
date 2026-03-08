@@ -123,3 +123,63 @@ text-decoration:underline;
 margin-bottom:10px;
 }
 
+
+/* Mobile-first improvement for login page */
+.login-container {
+  width: 90%;
+  max-width: 350px;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 20px;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .login-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 25px 20px;
+    border-radius: 12px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  button {
+    padding: 10px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 20px 15px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  .icon {
+    width: 80px;
+    height: 80px;
+  }
+}
+.table-wrapper{
+overflow-x :auto;
+width : 100%;
+display: block;
+}
