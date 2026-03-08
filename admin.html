@@ -78,7 +78,11 @@
     </div>
     <table>
         <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
-        <tbody id="passengerTable"></tbody>
+        <tbody id="passengerTable">
+<tr>
+<td colspan="5" style="text-align:center;">No passengers yet</td>
+</tr>
+</tbody>
     </table>
 </section>
 
@@ -90,7 +94,11 @@
     <table>
         
         <thead><tr><th>Train ID</th><th>Name</th><th>Route</th><th>Total Seats</th><th>Available</th><th>Status</th><th>Departure Time</th><th>Arrival Time</th><th>Ticket Price</th><th>Actions</th></tr></thead>
-        <tbody id="trainTable"></tbody>
+       <tbody id="trainTable">
+<tr>
+<td colspan="10" style="text-align:center;">No trains available</td>
+</tr>
+</tbody>
     </table>
 </section>
 
@@ -242,7 +250,7 @@
         if (editingRow) editingRow.remove();
 
         const table = document.getElementById(currentTable.toLowerCase() + "Table");
-        if (table.innerHTML.includes("No reservations yet")) table.innerHTML = "";
+       if (table.innerHTML.includes("No")) table.innerHTML = "";
 
         const row = table.insertRow();
         const prefix = currentTable === "Train" ? "TR-" : (currentTable === "Passenger" ? "P-" : "R-");
