@@ -416,6 +416,41 @@ body {
         padding: 15px;
     }
 }
+/* Fix reports overflow on mobile */
+#reports {
+    overflow-x: hidden;
+}
+
+#reports .table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+}
+
+#reports table {
+    min-width: 800px;
+    width: max-content;
+}
+
+@media (max-width: 768px) {
+    #reports {
+        width: 95%;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+
+    #reports .sectionHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    #reports .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
     </style>
 </head>
 
