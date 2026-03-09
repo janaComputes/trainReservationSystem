@@ -535,16 +535,41 @@
             document.getElementById("input2").value = editingRow.cells[2].innerText;
         }
 
-        function populateDropdowns() {
-            const pS = document.getElementById("passengerSelect"), tS = document.getElementById("trainSelect");
-            pS.innerHTML = '<option value="">-- Passenger --</option>';
-            tS.innerHTML = '<option value="">-- Train --</option>';
-            document.querySelectorAll("#passengerTable tr").forEach(r => pS.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`);
-            document.querySelectorAll("#trainTable tr").forEach(r => {
-                if (parseInt(r.cells[4].innerText) > 0) tS.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`;
-            });
-        }
+        // function populateDropdowns() {
+        //     const pS = document.getElementById("passengerSelect"), tS = document.getElementById("trainSelect");
+        //     pS.innerHTML = '<option value="">-- Passenger --</option>';
+        //     tS.innerHTML = '<option value="">-- Train --</option>';
+        //     document.querySelectorAll("#passengerTable tr").forEach(r => pS.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`);
+        //     document.querySelectorAll("#trainTable tr").forEach(r => {
+        //         if (parseInt(r.cells[4].innerText) > 0) tS.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`;
+        //     });
+        // }
+function populateDropdowns() {
+    const pSelect = document.getElementById("passengerSelect");
+    const tSelect = document.getElementById("trainSelect");
 
+    pSelect.innerHTML = '<option value="">-- Select Passenger --</option>';
+    tSelect.innerHTML = '<option value="">-- Select Train --</option>';
+
+    // passengers
+    document.querySelectorAll("#passengerTable tr").forEach(r => {
+        if (r.cells.length > 1) {
+            const name = r.cells[1].innerText;
+            pSelect.innerHTML += `<option value="${name}">${name}</option>`;
+        }
+    });
+
+    // trains
+    document.querySelectorAll("#trainTable tr").forEach(r => {
+        if (r.cells.length > 4) {
+            const name = r.cells[1].innerText;
+            const available = parseInt(r.cells[4].innerText);
+            if (available > 0) {
+                tSelect.innerHTML += `<option value="${name}">${name}</option>`;
+            }
+        }
+    });
+}
         function addToHistory(id, d, p, t, r, pr, s) {
             const hT = document.getElementById("historyTable");
             const row = hT.insertRow(0);
