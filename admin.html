@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Train Reservation System - Admin</title>
-    <script>
-        const userRole = localStorage.getItem("role");
-        if (!userRole && !window.location.href.includes("login.html")) {
-            window.location.href = "login.html";
-        }
-    </script>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; }
         .topbar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -18,19 +12,15 @@
         .tabs { display: flex; justify-content: center; margin: 20px; gap: 10px; }
         .tab { padding: 10px 20px; border: none; background: #ddd; border-radius: 20px; cursor: pointer; }
         .tab.active { background: #0b1c3f; color: white; }
-        .content { display: none; width: 80%; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .content { display: none; width: 90%; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         .content.active { display: block; }
         .sectionHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         button { background: #0b1c3f; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
-        .modal-box { background: white; padding: 30px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-box input, .modal-box select { 
-            width: 95%; margin: 10px 0; border-radius: 30px; padding: 12px; 
-            border: 1px solid #ccc; box-sizing: border-box; font-size: 14px;
-        }
-        /* CSS to hide placeholder row when data exists */
+        .modal-box { background: white; padding: 30px; border-radius: 20px; width: 350px; text-align: center; }
+        .modal-box input, .modal-box select { width: 95%; margin: 8px 0; border-radius: 30px; padding: 12px; border: 1px solid #ccc; box-sizing: border-box; }
         #reservationTable tr:first-child:not(:last-child) { display: none; }
         /* Tablet */
 @media (max-width: 1024px) {
@@ -100,18 +90,18 @@
     <button class="tab active" data-tab="reservations">Reservations</button>
     <button class="tab" data-tab="passengers">Passengers</button>
     <button class="tab" data-tab="trains">Trains</button>
-    <button class="tab" data-tab="reports">Reports</button> 
+    <button class="tab" data-tab="reports">Reports</button>
 </nav>
 
 <section id="dashboard" class="content">
     <div class="sectionHeader"><h2>Dashboard</h2></div>
-    <p>SEDEER'S SECTION NEHEHEHEHE</p>
+    <p>System metrics will appear here.</p>
 </section>
 
 <section id="reservations" class="content active">
     <div class="sectionHeader">
         <h2>Reservations</h2>
-        <button id="addReservation">Add Reservation</button>
+        <button onclick="openModal('Reservation')">Add Reservation</button>
     </div>
     <div class="table-wrapper">
     <table>
@@ -124,7 +114,7 @@
 <section id="passengers" class="content">
     <div class="sectionHeader">
         <h2>Passengers</h2>
-        <button id="addPassenger">Add Passenger</button>
+        <button onclick="openModal('Passenger')">Add Passenger</button>
     </div>
     <div class="table-wrapper">
     <table>
@@ -141,17 +131,13 @@
 <section id="trains" class="content">
     <div class="sectionHeader">
         <h2>Train Management</h2>
-        <button id="addTrain">Add Train</button>
+        <button onclick="openModal('Train')">Add Train</button>
     </div>
     <div class="table-wrapper">
     <table>
         
         <thead><tr><th>Train ID</th><th>Name</th><th>Route</th><th>Total Seats</th><th>Available</th><th>Status</th><th>Departure Time</th><th>Arrival Time</th><th>Ticket Price</th><th>Actions</th></tr></thead>
-       <tbody id="trainTable">
-<tr>
-<td colspan="10" style="text-align:center;">No trains available</td>
-</tr>
-</tbody>
+        <tbody id="trainTable"></tbody>
     </table>
 </div>
 </section>
@@ -161,7 +147,6 @@
         <h2>Reservation History</h2>
         <p style="color: gray;">Complete booking records and details</p>
     </div>
-    <div class="table-wrapper">
     <table>
         <thead><tr><th>ID</th><th>Date</th><th>Passenger</th><th>Train</th><th>Route</th><th>Seats</th><th>Price</th><th>Status</th></tr></thead>
         <tbody id="historyTable"></tbody>
@@ -170,30 +155,21 @@
 </section>
 
 <div id="modal">
-  <div class="modal-box">
-    <h3 id="modalTitle">Add New</h3>
-
-    <!-- للقطارات والركاب -->
-    <input type="text" id="input1" placeholder="Name">
-    
-    <!-- للـ Reservation فقط -->
-    <select id="passengerSelect" style="display:none;"></select>
-    <select id="trainSelect" style="display:none;"></select>
-    <input type="date" id="input3" style="display:none;">
-
-    <!-- للركاب -->
-    <input type="text" id="input2" placeholder="Detail">
-    <input type="tel" id="inputPhone" placeholder="Phone" style="display:none;">
-
-    <!-- للقطارات -->
-    <input type="number" id="inputSeats" placeholder="Total Seats" min="1" style="display:none;">
-    <input type="time" id="inputDeparture" placeholder="Departure Time" style="display:none;">
-    <input type="time" id="inputArrival" placeholder="Arrival Time" style="display:none;">
-    <input type="number" id="inputPrice" placeholder="Ticket Price (SR)" min="0" style="display:none;">
-
-    <button id="saveBtn" style="width: 100%; margin-top: 10px;">Save</button>
-    <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
-  </div>
+    <div class="modal-box">
+        <h3 id="modalTitle">Add New</h3>
+        <input type="text" id="input1" placeholder="Name">
+        <select id="passengerSelect" style="display:none;"></select>
+        <input type="text" id="input2" placeholder="Route/Email">
+        <select id="trainSelect" style="display:none;"></select>
+        <input type="tel" id="inputPhone" placeholder="Phone" style="display:none;">
+        <input type="number" id="inputSeats" placeholder="Total Seats" min="1" style="display:none;">
+        <input type="time" id="inputDep" style="display:none;">
+        <input type="time" id="inputArr" style="display:none;">
+        <input type="number" id="inputPrice" placeholder="Price (SR)" style="display:none;">
+        <input type="date" id="input3" style="display:none;">
+        <button id="saveBtn" style="width: 100%; margin-top: 10px;">Save</button>
+        <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
+    </div>
 </div>
 
 <script src="storage.js"></script>
@@ -205,12 +181,9 @@
         if (typeof loadAllData === "function") loadAllData();
         const role = localStorage.getItem("role");
         document.getElementById("roleText").innerText = "Logged in as: " + (role || "Guest");
-        if(role === "staff") {
-            // document.getElementById("addPassenger").style.display = "none";
-            document.getElementById("addTrain").style.display = "none";
-        }
     };
 
+    // Tab Switching Logic
     const tabs = document.querySelectorAll(".tab");
     tabs.forEach(tab => {
         tab.onclick = () => {
@@ -218,46 +191,30 @@
             document.querySelectorAll(".content").forEach(c => c.classList.remove("active"));
             tab.classList.add("active");
             document.getElementById(tab.dataset.tab).classList.add("active");
-            localStorage.setItem("activeTab", tab.dataset.tab);
         };
     });
 
     function openModal(type) {
-    document.getElementById("modal").style.display = "flex";
-    currentTable = type;
-    document.getElementById("modalTitle").innerText = "Add " + type;
+        document.getElementById("modal").style.display = "flex";
+        currentTable = type;
+        document.getElementById("modalTitle").innerText = "Add " + type;
+        const fields = ["input1","input2","input3","inputPhone","inputSeats","inputDep","inputArr","inputPrice","passengerSelect","trainSelect"];
+        fields.forEach(id => document.getElementById(id).style.display = "none");
 
-    // اخفاء كل الحقول اول شي
-    const allFields = ["input1","input2","input3","inputPhone","inputSeats","inputDeparture","inputArrival","inputPrice","passengerSelect","trainSelect"];
-    allFields.forEach(id => document.getElementById(id).style.display = "none");
-
-    if (type === "Reservation") {
-        populateDropdowns();
-        document.getElementById("input3").value = new Date().toISOString().split('T')[0];
-        document.getElementById("passengerSelect").style.display = "block";
-        document.getElementById("trainSelect").style.display = "block";
-        document.getElementById("input3").style.display = "block";
-    } 
-    else if (type === "Passenger") {
-        document.getElementById("input1").style.display = "block";
-        document.getElementById("input1").placeholder = "Name";
-        document.getElementById("input2").style.display = "block";
-        document.getElementById("input2").placeholder = "Email";
-        document.getElementById("inputPhone").style.display = "block";
-    } 
-    else if (type === "Train") {
-        document.getElementById("input1").style.display = "block";
-        document.getElementById("input1").placeholder = "Train Name";
-
-        document.getElementById("input2").style.display = "block";
-        document.getElementById("input2").placeholder = "Route";
-
-        document.getElementById("inputSeats").style.display = "block";
-        document.getElementById("inputDeparture").style.display = "block";
-        document.getElementById("inputArrival").style.display = "block";
-        document.getElementById("inputPrice").style.display = "block";
+        if (type === "Reservation") {
+            populateDropdowns();
+            document.getElementById("input3").value = new Date().toISOString().split('T')[0];
+            ["passengerSelect","trainSelect","input3"].forEach(id => document.getElementById(id).style.display = "block");
+        } else if (type === "Passenger") {
+            ["input1","input2","inputPhone"].forEach(id => document.getElementById(id).style.display = "block");
+            document.getElementById("input1").placeholder = "Name";
+            document.getElementById("input2").placeholder = "Email";
+        } else if (type === "Train") {
+            ["input1","input2","inputSeats","inputDep","inputArr","inputPrice"].forEach(id => document.getElementById(id).style.display = "block");
+            document.getElementById("input1").placeholder = "Train Name";
+            document.getElementById("input2").placeholder = "Route";
+        }
     }
-}
 
     function closeModal() {
         document.getElementById("modal").style.display = "none";
@@ -279,83 +236,56 @@
             v2 = document.getElementById("input2").value;
         }
 
-        if (!v1 || !v2) { alert("Please fill fields."); return; }
+        if (!v1 || !v2) { alert("Fill all fields."); return; }
 
-        // Passenger Validation
-        if (currentTable === "Passenger") {
-            if (!/^[0-9]{10}$/.test(vPhone)) { alert("Phone must be 10 digits."); return; }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v2)) { alert("Invalid email."); return; }
-        }
-
-        // Train Seat Logic
         if (currentTable === "Reservation") {
-            let success = false;
+            let trainFound = false;
             document.querySelectorAll("#trainTable tr").forEach(row => {
                 if (row.cells[1].innerText === v2) {
                     let avail = parseInt(row.cells[4].innerText);
                     if (avail <= 0) { alert("Train Full!"); return; }
-                    avail--;
-                    row.cells[4].innerText = avail;
+                    row.cells[4].innerText = --avail;
                     if (avail === 0) { row.cells[5].innerText = "Full"; row.cells[5].style.color = "red"; }
-                    success = true;
+                    trainFound = true;
                 }
             });
-            if (!success && !editingRow) { alert("Train not found."); return; }
+            if (!trainFound && !editingRow) return;
         }
 
         if (editingRow) editingRow.remove();
-
         const table = document.getElementById(currentTable.toLowerCase() + "Table");
        if (table.innerHTML.includes("No")) table.innerHTML = "";
 
         const row = table.insertRow();
-        const prefix = currentTable === "Train" ? "TR-" : (currentTable === "Passenger" ? "P-" : "R-");
-        const uniqueID = prefix + Math.floor(Math.random() * 100);
-
-        row.insertCell(0).innerText = uniqueID;
+        const id = (currentTable[0] + Math.floor(Math.random() * 100)).toUpperCase();
+        row.insertCell(0).innerText = id;
         row.insertCell(1).innerText = v1;
         row.insertCell(2).innerText = v2;
 
-       if (currentTable === "Train") {
-    const departure = document.getElementById("inputDeparture").value;
-    const arrival = document.getElementById("inputArrival").value;
-    const price = parseFloat(document.getElementById("inputPrice").value);
-
-    // التحقق من صحة البيانات
-    if (!v1 || !v2 || !vSeats || !departure || !arrival || isNaN(price)) {
-        alert("Please fill all train fields correctly!");
-        return;
-    }
-    if (parseInt(vSeats) <= 0) { alert("Total seats must be greater than 0."); return; }
-    if (price < 0) { alert("Ticket price cannot be negative."); return; }
-    if (arrival <= departure) { alert("Arrival time must be after departure time."); return; }
-
-    // إدراج البيانات في الصف
-    row.insertCell(0).innerText = uniqueID;
-    row.insertCell(1).innerText = v1; // Name
-    row.insertCell(2).innerText = v2; // Route
-    row.insertCell(3).innerText = vSeats; // Total Seats
-    row.insertCell(4).innerText = vSeats; // Available Seats
-    row.insertCell(5).innerText = "Available"; // Status
-    row.insertCell(6).innerText = departure;
-    row.insertCell(7).innerText = arrival;
-    row.insertCell(8).innerText = price.toFixed(2) + " SR";
-
-    const actionCell = row.insertCell(9);
-    actionCell.innerHTML = `<button onclick="editRow(this)" style="background:#0b1c3f; margin-right:5px;">Edit</button>
-                            <button onclick="deleteRow(this)" style="background:#cc0000;">Delete</button>`;
-}
-         else if (currentTable === "Passenger") {
+        if (currentTable === "Train") {
+            row.insertCell(3).innerText = vSeats;
+            row.insertCell(4).innerText = vSeats;
+            row.insertCell(5).innerText = "Available";
+            row.insertCell(6).innerText = document.getElementById("inputDep").value;
+            row.insertCell(7).innerText = document.getElementById("inputArr").value;
+            row.insertCell(8).innerText = document.getElementById("inputPrice").value + " SR";
+        } else if (currentTable === "Passenger") {
             row.insertCell(3).innerText = vPhone;
         } else {
             row.insertCell(3).innerText = vDate;
             row.insertCell(4).innerText = "Confirmed";
-            addToHistory(uniqueID, vDate, v1, v2, "Confirmed"); // Sync to Reports
+            
+            // Get Route/Price from Train table for History
+            let route = "-", price = "0 SR";
+            document.querySelectorAll("#trainTable tr").forEach(tr => {
+                if (tr.cells[1].innerText === v2) { route = tr.cells[2].innerText; price = tr.cells[8].innerText; }
+            });
+            addToHistory(id, vDate, v1, v2, route, price, "Confirmed");
         }
 
         const actionCell = row.insertCell(-1);
-        actionCell.innerHTML = `<button onclick="editRow(this)" style="background:#0b1c3f; margin-right:5px;">Edit</button> 
-                                <button onclick="deleteRow(this)" style="background:#cc0000;">${currentTable === 'Reservation' ? 'Cancel' : 'Delete'}</button>`;
+        actionCell.innerHTML = `<button onclick="editRow(this)" style="background:#0b1c3f;margin-right:5px">Edit</button>
+                                <button onclick="deleteRow(this)" style="background:#cc0000">${currentTable==='Reservation'?'Cancel':'Delete'}</button>`;
         
         closeModal();
         if (typeof saveAllData === "function") saveAllData();
@@ -365,63 +295,57 @@
         const row = btn.parentElement.parentElement;
         if (row.parentElement.id === "reservationTable") {
             if (row.cells[4].innerText === "Canceled") return;
-            if (confirm("Cancel reservation?")) {
+            if (confirm("Cancel this reservation?")) {
                 const trainName = row.cells[2].innerText;
-                document.querySelectorAll("#trainTable tr").forEach(tRow => {
-                    if (tRow.cells[1].innerText === trainName) {
-                        let avail = parseInt(tRow.cells[4].innerText) + 1;
-                        tRow.cells[4].innerText = avail;
-                        tRow.cells[5].innerText = "Available";
-                        tRow.cells[5].style.color = "green";
+                const resID = row.cells[0].innerText;
+                
+                // Refund Seat
+                document.querySelectorAll("#trainTable tr").forEach(tr => {
+                    if (tr.cells[1].innerText === trainName) {
+                        tr.cells[4].innerText = parseInt(tr.cells[4].innerText) + 1;
+                        tr.cells[5].innerText = "Available"; tr.cells[5].style.color = "green";
                     }
                 });
-                row.cells[4].innerText = "Canceled";
-                row.cells[4].style.color = "red";
+
+                // Update Status
+                row.cells[4].innerText = "Canceled"; row.cells[4].style.color = "red";
                 btn.style.display = "none";
+
+                // Sync History
+                document.querySelectorAll("#historyTable tr").forEach(hr => {
+                    if (hr.cells[0].innerText === resID) hr.cells[7].innerHTML = "<span style='color:red'>Canceled</span>";
+                });
             }
         } else {
-            if (confirm("Delete entry?")) row.remove();
+            if (confirm("Delete this entry?")) row.remove();
         }
         if (typeof saveAllData === "function") saveAllData();
     }
 
     function editRow(btn) {
         editingRow = btn.parentElement.parentElement;
-        const tableId = editingRow.parentElement.id;
+        const type = editingRow.parentElement.id.replace("Table", "");
+        openModal(type.charAt(0).toUpperCase() + type.slice(1));
         document.getElementById("input1").value = editingRow.cells[1].innerText;
         document.getElementById("input2").value = editingRow.cells[2].innerText;
-        if (tableId === "passengerTable") {
-            document.getElementById("inputPhone").value = editingRow.cells[3].innerText;
-            openModal("Passenger");
-        } else if (tableId === "trainTable") {
-            document.getElementById("inputSeats").value = editingRow.cells[3].innerText;
-            openModal("Train");
-        } else {
-            openModal("Reservation");
-        }
     }
 
     function populateDropdowns() {
-        const pSelect = document.getElementById("passengerSelect");
-        const tSelect = document.getElementById("trainSelect");
-        pSelect.innerHTML = '<option value="">-- Passenger --</option>';
-        tSelect.innerHTML = '<option value="">-- Train --</option>';
-        document.querySelectorAll("#passengerTable tr").forEach(r => pSelect.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`);
+        const pS = document.getElementById("passengerSelect"), tS = document.getElementById("trainSelect");
+        pS.innerHTML = '<option value="">-- Passenger --</option>';
+        tS.innerHTML = '<option value="">-- Train --</option>';
+        document.querySelectorAll("#passengerTable tr").forEach(r => pS.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`);
         document.querySelectorAll("#trainTable tr").forEach(r => {
-            if (parseInt(r.cells[4].innerText) > 0) tSelect.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`;
+            if (parseInt(r.cells[4].innerText) > 0) tS.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`;
         });
     }
 
-    function addToHistory(id, date, passenger, train, status) {
-        const hTable = document.getElementById("historyTable");
-        if (!hTable) return;
-        const row = hTable.insertRow(0);
-        row.innerHTML = `<td>${id}</td><td>${date}</td><td>${passenger}</td><td>${train}</td><td>-</td><td>1</td><td>$0</td><td><span style="color:green">${status}</span></td>`;
+    function addToHistory(id, d, p, t, r, pr, s) {
+        const hT = document.getElementById("historyTable");
+        const row = hT.insertRow(0);
+        row.innerHTML = `<td>${id}</td><td>${d}</td><td>${p}</td><td>${t}</td><td>${r}</td><td>1</td><td>${pr}</td><td><span style="color:green">${s}</span></td>`;
     }
 
-    document.getElementById("addTrain").onclick = () => openModal("Train");
-    document.getElementById("addPassenger").onclick = () => openModal("Passenger");
-    document.getElementById("addReservation").onclick = () => openModal("Reservation");
     document.getElementById("logoutBtn").onclick = () => { localStorage.removeItem("role"); window.location.href = "login.html"; };
 </script>
 </body>
