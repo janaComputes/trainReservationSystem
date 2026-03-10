@@ -467,6 +467,11 @@
         <div class="sectionHeader">
             <div>
                 <h2 style="margin:0;">Reports & Analytics</h2>
+              <div style="margin-top:10px; display:flex; gap:10px;">
+    <button id="weeklyBtn">Weekly</button>
+    <button id="monthlyBtn">Monthly</button>
+    <button id="yearlyBtn">Yearly</button>
+</div>
                 <p style="color: gray; font-size: 14px; margin-top: 5px;">Detailed insights and booking history</p>
             </div>
             <button id="exportReport" style="background:#0b1c3f; color: white; border-radius: 5px;">📥 Export
@@ -531,6 +536,7 @@
 
     <script src="storage.js"></script>
     <script>
+         let currentReportType = "weekly";
         var currentTable = "";
         let editingRow = null;
 
@@ -538,7 +544,7 @@
             if (typeof loadAllData === "function") loadAllData();
 
             updateReportAnalytics();
-
+filterReport(currentReportType);
             const role = localStorage.getItem("role");
             document.getElementById("roleText").innerText = "Logged in as: " + (role || "Guest");
 
@@ -661,6 +667,7 @@
             if (typeof saveAllData === "function") saveAllData();
 
             updateReportAnalytics();
+            filterReport(currentReportType);
         };
 
         function deleteRow(btn) {
@@ -694,6 +701,7 @@
             if (typeof saveAllData === "function") saveAllData();
             
             updateReportAnalytics();
+            filterReport(currentReportType);
         }
 
         function editRow(btn) {
@@ -767,6 +775,47 @@ function populateDropdowns() {
             const avg = confirmedCount > 0 ? (totalRev / confirmedCount).toFixed(2) : 0;
             document.getElementById("avgPrice").innerText = avg + " SR";
         }
+    function filterReport(type) {
+    const rows = document.querySelectorAll("#historyTable tr");
+
+    const now = new Date();
+    let totalRev = 0;
+    let bookings = 0;
+
+    rows.forEach(row => {
+        if (row.cells.length < 8) return;
+
+        const dateText = row.cells[1].innerText;
+        const rowDate = new Date(dateText + "T00:00:00");
+
+        let include = false;
+
+        if (type === "weekly") {
+            const diff = (now - rowDate)/(1000*60*60*24);
+            if (diff <= 7) include = true;
+        }
+        if (type === "monthly") {
+            if(rowDate.getMonth() === now.getMonth() && rowDate.getFullYear() === now.getFullYear()) include = true;
+        }
+        if (type === "yearly") {
+            if(rowDate.getFullYear() === now.getFullYear()) include = true;
+        }
+
+        if (include && row.cells[7].innerText.includes("Confirmed")) {
+            row.style.display = "";
+            const price = parseFloat(row.cells[6].innerText.replace(" SR","")) || 0;
+            totalRev += price;
+            bookings++;
+        } else {
+            row.style.display = "none";
+        }
+    });
+
+    document.getElementById("totalRevenue").innerText = totalRev.toFixed(2) + " SR";
+    document.getElementById("totalBookings").innerText = bookings;
+    const avg = bookings > 0 ? (totalRev / bookings).toFixed(2) : 0;
+    document.getElementById("avgPrice").innerText = avg + " SR";
+}
 
         document.getElementById("logoutBtn").onclick = () => { localStorage.removeItem("role"); window.location.href = "login.html"; };
 </script>
@@ -870,7 +919,25 @@ function populateDropdowns() {
         });
 
         });
+const reportBtns = ["weeklyBtn","monthlyBtn","yearlyBtn"];
 
+reportBtns.forEach(id=>{
+    const btn = document.getElementById(id);
+
+    btn.addEventListener("click", function(){
+        // إزالة active من كل الأزرار
+        reportBtns.forEach(b => document.getElementById(b).classList.remove("active"));
+
+        // إضافة active للزر المضغوط
+        this.classList.add("active");
+
+        // حفظ نوع الفلترة الحالي
+        currentReportType = this.id.replace("Btn","");
+
+        // تطبيق الفلترة حسب الزر
+        filterReport(currentReportType);
+    });
+});
     </script>
     </body>
     </html>
