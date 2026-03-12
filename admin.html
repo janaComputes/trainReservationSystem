@@ -467,6 +467,13 @@
                 -webkit-overflow-scrolling: touch;
             }
         }
+        #reservations .vip {
+  background:#fff7d6;
+  color:#c79b00;
+  font-weight:bold;
+  padding:4px 8px;
+  border-radius:6px;
+}
     </style>
 </head>
 
@@ -586,6 +593,7 @@
                         <th>ID</th>
                         <th>Passenger</th>
                         <th>Train</th>
+                        <th>Ticket Type</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -695,6 +703,7 @@
                         <th>Date</th>
                         <th>Passenger</th>
                         <th>Train</th>
+                        <th>Ticket Type</th>
                         <th>Route</th>
                         <th>Seats</th>
                         <th>Price</th>
@@ -713,6 +722,10 @@
             <select id="passengerSelect" style="display:none;"></select>
             <input type="email" id="input2" placeholder="example@email.com">
             <select id="trainSelect" style="display:none;"></select>
+            <select id="ticketType" style="display:none;">
+<option value="Standard">Standard Ticket</option>
+<option value="VIP">VIP Ticket</option>
+</select>
             <input type="tel" id="inputPhone" value="+966" maxlength="13" style="display:none;">
             <input type="number" id="inputSeats" placeholder="Total Seats" min="1" style="display:none;">
             <input type="time" id="inputDep" style="display:none;">
@@ -770,7 +783,8 @@
             if (type === "Reservation") {
                 populateDropdowns();
                 document.getElementById("input3").value = new Date().toISOString().split('T')[0];
-                ["passengerSelect", "trainSelect", "input3"].forEach(id => document.getElementById(id).style.display = "block");
+                ["passengerSelect", "trainSelect", "input3","ticketType"]
+.forEach(id => document.getElementById(id).style.display = "block");
             } else if (type === "Passenger") {
     ["input1", "input2", "inputPhone"].forEach(id => 
         document.getElementById(id).style.display = "block"
@@ -800,6 +814,7 @@
             const vPhone = document.getElementById("inputPhone").value.trim();
             const vSeats = document.getElementById("inputSeats").value;
             const vDate = document.getElementById("input3").value;
+            const ticketType = document.getElementById("ticketType").value;
 
             // 1. DATA VALIDATION & ASSIGNMENT
             if (currentTable === "Reservation") {
@@ -901,9 +916,9 @@ if (price > 10000) {
                 row.insertCell(3).innerText = vPhone;
             } else {
                 // RESERVATION SPECIFIC
-                row.insertCell(3).innerText = vDate;
-                row.insertCell(4).innerText = "Confirmed";
-
+                row.insertCell(3).innerHTML = ticketType === "VIP" ? "<span class='vip'>VIP</span>" : "Standard";
+row.insertCell(4).innerText = vDate;
+row.insertCell(5).innerText = "Confirmed";
                 // Find Route and Price for History
                 let route = "-", price = "0 SR";
                 document.querySelectorAll("#trainTable tr").forEach(tr => {
@@ -924,6 +939,7 @@ if (price > 10000) {
             if (typeof saveAllData === "function") saveAllData();
             updateReportAnalytics();
             filterReport(currentReportType);
+            
         };
         function deleteRow(btn) {
             const row = btn.parentElement.parentElement;
