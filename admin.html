@@ -711,13 +711,13 @@
             <h3 id="modalTitle">Add New</h3>
             <input type="text" id="input1" placeholder="Name">
             <select id="passengerSelect" style="display:none;"></select>
-            <input type="text" id="input2" placeholder="Route/Email">
+            <input type="email" id="input2" placeholder="example@email.com">
             <select id="trainSelect" style="display:none;"></select>
-            <input type="tel" id="inputPhone" placeholder="+966" style="display:none;">
+            <input type="tel" id="inputPhone" value="+966" maxlength="13" style="display:none;">
             <input type="number" id="inputSeats" placeholder="Total Seats" min="1" style="display:none;">
             <input type="time" id="inputDep" style="display:none;">
             <input type="time" id="inputArr" style="display:none;">
-            <input type="number" id="inputPrice" placeholder="Price (SR)" min="0" style="display:none;">
+           <input type="number" id="inputPrice" placeholder="Price (SR)" min="1" max="10000" step="0.01" style="display:none;">
             <input type="date" id="input3" style="display:none;">
             <button id="saveBtn" style="width: 100%; margin-top: 10px;">Save</button>
             <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
@@ -772,10 +772,17 @@
                 document.getElementById("input3").value = new Date().toISOString().split('T')[0];
                 ["passengerSelect", "trainSelect", "input3"].forEach(id => document.getElementById(id).style.display = "block");
             } else if (type === "Passenger") {
-                ["input1", "input2", "inputPhone"].forEach(id => document.getElementById(id).style.display = "block");
-                document.getElementById("input1").placeholder = "Name";
-                document.getElementById("input2").placeholder = "Email";
-            } else if (type === "Train") {
+    ["input1", "input2", "inputPhone"].forEach(id => 
+        document.getElementById(id).style.display = "block"
+    );
+
+    document.getElementById("input1").placeholder = "Name";
+    document.getElementById("input2").placeholder = "Email";
+
+    // يرجع مفتاح السعودية كل مرة يفتح المودال
+    document.getElementById("inputPhone").value = "+966";
+}
+             else if (type === "Train") {
                 ["input1", "input2", "inputSeats", "inputDep", "inputArr", "inputPrice"].forEach(id => document.getElementById(id).style.display = "block");
                 document.getElementById("input1").placeholder = "Train Name";
                 document.getElementById("input2").placeholder = "Route";
@@ -818,19 +825,57 @@
                 }
                 if (!trainFound) { alert("Error: Train details not found."); return; }
 
-            } else if (currentTable === "Passenger") {
-                v1 = document.getElementById("input1").value.trim();
-                v2 = document.getElementById("input2").value.trim();
-                if (!v1 || !v2 || !vPhone) { alert("Fill all passenger fields."); return; }
+   } else if (currentTable === "Passenger") {
+    v1 = document.getElementById("input1").value.trim();
+    v2 = document.getElementById("input2").value.trim();
+    const phoneInput = document.getElementById("inputPhone").value.trim();
 
-            } else if (currentTable === "Train") {
+    if (!v1 || !v2 || !phoneInput) {
+        alert("Fill all passenger fields.");
+        return;
+    }
+
+    // تحقق من الايميل
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(v2)) {
+        alert("Please enter a valid email (example: user@email.com)");
+        return;
+    }
+
+    // تحقق رقم الجوال
+    const phoneRegex = /^\+9665\d{8}$/;
+
+    if (!phoneRegex.test(phoneInput)) {
+        alert("Phone number must be Saudi format: +9665XXXXXXXX");
+        return;
+    }
+
+    // إضافة مفتاح السعودية تلقائياً
+    document.getElementById("inputPhone").value = "+966" + phoneInput;
+}
+
+             else if (currentTable === "Train") {
                 v1 = document.getElementById("input1").value.trim();
                 v2 = document.getElementById("input2").value.trim();
                 const dep = document.getElementById("inputDep").value;
                 const arr = document.getElementById("inputArr").value;
-                const price = document.getElementById("inputPrice").value;
+                const price = parseFloat(document.getElementById("inputPrice").value);
 
-                if (!v1 || !v2 || !vSeats || !dep || !arr || !price) { alert("Fill all train fields."); return; }
+if (!v1 || !v2 || !vSeats || !dep || !arr || price === "") {
+    alert("Fill all train fields.");
+    return;
+}
+
+if (price <= 0) {
+    alert("Ticket price must be greater than 0.");
+    return;
+}
+
+if (price > 10000) {
+    alert("Ticket price seems too high.");
+    return;
+}
                 if (arr <= dep) { alert("Arrival must be after departure."); return; }
             }
 
