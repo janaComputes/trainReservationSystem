@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Train Reservation System - Admin</title>
-    <script>
+    <!-- <script>
         (function () {
             // 1. Check if the 'role' exists in LocalStorage
             const userRole = localStorage.getItem("role");
@@ -17,7 +17,7 @@
                 window.location.replace("login.html");
             }
         })();
-    </script>
+    </script> -->
     <style>
         /* ===== Dashboard Styles ===== */
         #dashboard {
@@ -1242,5 +1242,14 @@ row.insertCell(5).innerText = "Confirmed";
         });
     </script>
 </body>
+<script>
+window.onload = function() {
+    const role = localStorage.getItem("role");
+    if (!role) {
+        window.location.replace("login.html"); // يرجع لتسجيل الدخول إذا ما فيه دور
+    }
+    document.getElementById("roleText").innerText = "Logged in as: " + role; // يعرض الدور
+};
+</script>
 
 </html>

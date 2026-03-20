@@ -9,37 +9,22 @@
 
 </head>
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+    const loginForm = document.getElementById("loginForm");
 
-const loginForm = document.getElementById("loginForm");
+    loginForm.addEventListener("submit", function(e){
+        e.preventDefault();
 
-loginForm.addEventListener("submit", function(e){
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-e.preventDefault();
+       const users = JSON.parse(localStorage.getItem("systemUsers")) || [];
 
-const username = document.getElementById("username").value;
-const password = document.getElementById("password").value;
+        const user = users.find(u => u.username === username && u.password === password);
 
-const users = JSON.parse(localStorage.getItem("users")) || [];
-
-const user = users.find(u => 
-u.username === username && u.password === password
-);
-
-if(user){
-
-localStorage.setItem("currentUser", JSON.stringify(user));
-localStorage.setItem("role", user.role);
-
-window.location.href = "dashboard.html";
-
-}else{
-
-document.getElementById("error").innerText="Invalid login";
-
-}
-
+        
+    });
 });
-
 </script>
 <body>
 
@@ -51,25 +36,113 @@ document.getElementById("error").innerText="Invalid login";
 <p class="subtitle">Sign in to manage reservations and passengers</p>
 
 <form id="loginForm">
+<div id="verificationContainer" style="display:none; text-align:center; margin-top:20px;">
+    <h3>Email Verification</h3>
+    <p>Enter the 4-digit code sent to your email:</p>
+    <div id="codeBoxesContainer" style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
+        <input type="text" maxlength="1" class="codeBox" disabled />
+        <input type="text" maxlength="1" class="codeBox" disabled />
+        <input type="text" maxlength="1" class="codeBox" disabled />
+        <input type="text" maxlength="1" class="codeBox" disabled />
+    </div>
+    <button id="verifyCodeBtn" style="margin-top:15px; padding:10px 20px; font-size:16px; cursor:pointer;">Verify</button>
+    <p id="codeError" style="color:red; margin-top:10px;"></p>
+</div>
 
+<style>
+.codeBox {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.2s;
+}
+.codeBox:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px #007bff;
+}
+#verifyCodeBtn:hover {
+    background-color: #007bff;
+    color: white;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const loginForm = document.getElementById("loginForm");
+    const verificationContainer = document.getElementById("verificationContainer");
+    const codeBoxes = document.querySelectorAll(".codeBox");
+    const verifyBtn = document.getElementById("verifyCodeBtn");
+    const codeError = document.getElementById("codeError");
+    let verificationCode = "";
+
+    loginForm.addEventListener("submit", function(e){
+        e.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const users = JSON.parse(localStorage.getItem("systemUsers")) || [];
+
+        const user = users.find(u => u.username === username && u.password === password);
+        if(user){
+            localStorage.setItem("currentUser", JSON.stringify(user));
+            localStorage.setItem("role", user.role);
+
+            // توليد رمز 4 أرقام عشوائي
+            verificationCode = Math.floor(1000 + Math.random()*9000).toString();
+            console.log("Verification code (for testing):", verificationCode);
+
+            // إظهار المربعات فارغة
+            codeBoxes.forEach(box => box.value = "");
+            verificationContainer.style.display = "block";
+
+            // تعبئة الأرقام تلقائيًا بعد 2 ثانية
+            setTimeout(() => {
+                codeBoxes.forEach((box, idx) => {
+                    setTimeout(() => {
+                        box.value = verificationCode[idx];
+                    }, idx * 300); // كل رقم يظهر بعد 300ms عن الرقم السابق
+                });
+            }, 2000); // الانتظار ثانيتين قبل البدء
+
+        } else {
+            document.getElementById("error").innerText = "Invalid username or password!";
+        }
+    });
+
+    // التحقق عند الضغط على زر Verify
+    verifyBtn.addEventListener("click", function(){
+        const userCode = Array.from(codeBoxes).map(box => box.value).join("");
+        if(userCode === verificationCode){
+            window.location.href = "admin.html";
+        } else {
+            codeError.innerText = "Something went wrong!";
+        }
+    });
+});
+</script>
 <label>UserID</label>
 <input type="text" id="username" placeholder="Enter Your ID" required>
 
 <label>Password</label>
 <input type="password" id="password" placeholder="Enter password" required>
-
+<p style="text-align:left; margin-top:5px;">
+  <a href="reset_password.html" style="color:blue; text-decoration:underline;">Forgot Password?</a>
+</p>
 <div class="role">
-<p>Login as</p>
+  <p>Login as</p>
 
-<label class="radio">
-<input type="radio" name="role" checked>
-Staff
-</label>
+  <label class="radio">
+    <input type="radio" name="role" value="staff" checked>
+    Staff
+  </label>
 
-<label class="radio">
-<input type="radio" name="role">
-Admin
-</label>
+  <label class="radio">
+    <input type="radio" name="role" value="admin">
+    Admin
+  </label>
 </div>
 
 <button type="submit">Sign In</button>
@@ -81,32 +154,48 @@ Don't have an account?
 
 </form>
 <form id="signupForm" style="display:none;">
-    <h3>Create Account</h3>
+  <h3>Create Account</h3>
 
-    <label>Username</label>
-    <input type="text" id="newUsername" placeholder="Create a Username" required>
+  <label>Username</label>
+  <input type="text" id="newUsername" placeholder="Create a Username" required>
 
-    <label>Password</label>
-    <input type="password" id="newPassword" placeholder="Create a Password" required>
+  <label>Email</label>
+  <input type="text" id="newEmail" placeholder="Enter Your Email" required> <!-- مهم: type="text" ليطبق CSS -->
 
-    <div class="role">
-        <p>Register as</p>
-        <label class="radio">
-            <input type="radio" name="newRole" value="staff" checked>
-            Staff
-        </label>
-        <label class="radio">
-            <input type="radio" name="newRole" value="admin">
-            Admin
-        </label>
-    </div>
+  <label>Password</label>
+  <input type="password" id="newPassword" placeholder="Create a Password" required>
+  <small style="color:gray; font-size:12px; display:block; margin-top:4px;">
+    Password must be at least 8 characters, include a number, a symbol, and a capital letter.
+  </small>
 
-    <button type="submit">Create Account</button>
+  <div class="role">
+      <p>Register as</p>
+      <label class="radio">
+          <input type="radio" name="newRole" value="staff" checked>
+          Staff
+      </label>
+      <label class="radio">
+          <input type="radio" name="newRole" value="admin">
+          Admin
+      </label>
+  </div>
 
-    <p class="signup-link">
-        Already have an account?
-        <a href="#" onclick="showLogin()">Login</a>
-    </p>
+  <div class="privacy" style="margin-top:10px;">
+      <label>
+          <input type="checkbox" id="privacyCheck" required>
+          I agree to the 
+          <a href="privacy.html" class="privacy-link">Privacy Policy</a>
+      </label>
+  </div>
+
+  <button type="submit">Create Account</button>
+
+  <p class="signup-link">
+      Already have an account?
+      <a href="#" onclick="showLogin()">Login</a>
+  </p>
+
+  <p id="signupError" style="color:red; margin-top:5px;"></p>
 </form>
 
 
@@ -114,7 +203,7 @@ Don't have an account?
 <script>
    
     
-localStorage.setItem("currentUser", JSON.stringify(user));
+//localStorage.setItem("currentUser", JSON.stringify(user));
 function showSignup(){
 document.getElementById("loginForm").style.display="none";
 document.getElementById("signupForm").style.display="block";

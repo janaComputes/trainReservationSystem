@@ -1,185 +1,195 @@
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial, Helvetica, sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-body{
-background:#f3f4f6;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
+body {
+    background: #f3f4f6;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.login-container{
-background:white;
-padding:40px;
-border-radius:15px;
-width:350px;
-box-shadow:0 10px 25px rgba(0,0,0,0.1);
-text-align:center;
+.login-container {
+    background: white;
+    padding: 30px 25px; /* أقل من السابق */
+    border-radius: 15px;
+    width: 350px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    text-align: center;
 }
 
-.icon{
-width:60px;
-height:60px;
-background:#ffffff;
-color:white;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:50%;
-font-size:30px;
-margin:0 auto 15px auto;
-width: 100px; 
-height: 100px; 
-object-fit: cover; 
-border-radius: 50%; 
-border: 3px solid #150760; 
-
+.icon {
+    width: 100px; 
+    height: 100px; 
+    object-fit: cover; 
+    border-radius: 50%; 
+    border: 3px solid #150760; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
 }
 
-h2{
-font-size:22px;
-margin-bottom:5px;
+h2 {
+    font-size: 22px;
+    margin-bottom: 5px;
 }
 
-.subtitle{
-color:gray;
-font-size:14px;
-margin-bottom:20px;
+.subtitle {
+    color: gray;
+    font-size: 14px;
+    margin-bottom: 20px;
 }
 
-label{
-display:block;
-text-align:left;
-margin-top:15px;
-font-weight:600;
-font-size:14px;
+label {
+    display: block;
+    text-align: left;
+    margin-top: 15px;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 input[type="text"],
-input[type="password"]{
-width:100%;
-padding:12px;
-margin-top:6px;
-border:none;
-border-radius:8px;
-background:#f1f1f1;
-}
-
-.role{
-text-align:left;
-margin-top:15px;
-}
-
-.radio{
-display:block;
-margin-top:5px;
-font-weight:normal;
-}
-
-button{
-width:100%;
-margin-top:20px;
-padding:12px;
-border:none;
-border-radius:10px;
-background:#02021c;
-color:white;
-font-size:16px;
-font-weight:bold;
-cursor:pointer;
-}
-
-button:hover{
-background:#11114d;
-}
-
-#error{
-color:red;
-margin-top:10px;
-font-size:13px;
-}
-
-.signup-link{
-margin-top:15px;
-font-size:14px;
-}
-
-.signup-link a{
-color:#2563eb;
-text-decoration:none;
-font-weight:bold;
-}
-
-.signup-link a:hover{
-text-decoration:underline;
-}
-
-#signupForm h3{
-margin-bottom:10px;
-}
-
-
-/* Mobile-first improvement for login page */
-.login-container {
-  width: 90%;
-  max-width: 350px;
-}
-
-@media (max-width: 768px) {
-  body {
-    padding: 20px;
-    height: auto;
-    min-height: 100vh;
-  }
-
-  .login-container {
+input[type="password"],
+input[type="email"] {
     width: 100%;
-    max-width: 100%;
-    padding: 25px 20px;
-    border-radius: 12px;
-  }
+    padding: 12px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f1f1;
+}
 
-  h2 {
-    font-size: 20px;
-  }
+.role {
+    text-align: left;
+    margin-top: 15px;
+}
 
-  .subtitle {
+.radio {
+    display: block;
+    margin-top: 5px;
+    font-weight: normal;
+}
+
+button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #02021c;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #11114d;
+}
+
+#error, #signupError {
+    color: red;
+    margin-top: 10px;
     font-size: 13px;
-  }
+}
 
-  input[type="text"],
-  input[type="password"] {
-    padding: 10px;
+.signup-link {
+    margin-top: 15px;
     font-size: 14px;
-  }
-
-  button {
-    padding: 10px;
-    font-size: 15px;
-  }
 }
 
+.signup-link a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+#signupForm h3 {
+    margin-bottom: 10px;
+}
+
+/* Mobile-first improvement */
+.login-container {
+    width: 90%;
+    max-width: 350px;
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+    body {
+        padding: 20px;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 100%;
+        padding: 25px 20px;
+        border-radius: 12px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    .subtitle {
+        font-size: 13px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    button {
+        padding: 10px;
+        font-size: 15px;
+    }
+}
+
+/* Mobile */
 @media (max-width: 480px) {
-  .login-container {
-    padding: 20px 15px;
-  }
+    .login-container {
+        padding: 15px 10px;
+        width: 90%;
+    }
 
-  h2 {
-    font-size: 18px;
-  }
+    h2 {
+        font-size: 17px;
+    }
 
-  .icon {
-    width: 80px;
-    height: 80px;
-  }
+    .icon {
+        width: 80px;
+        height: 80px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+        padding: 10px;
+    }
 }
-.table-wrapper{
-overflow-x :auto;
-width : 100%;
-display: block;
+
+.table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    display: block;
+}
+
+.privacy-link {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
 }
