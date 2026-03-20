@@ -665,9 +665,10 @@
             <div>
                 <h2 style="margin:0;">Reports & Analytics</h2>
                 <div style="margin-top:10px; display:flex; gap:10px;">
+                    <button id="dailyBtn">Daily</button>
                     <button id="weeklyBtn">Weekly</button>
                     <button id="monthlyBtn">Monthly</button>
-                    <button id="yearlyBtn">Yearly</button>
+                    
                 </div>
                 <p style="color: gray; font-size: 14px; margin-top: 5px;">Detailed insights and booking history</p>
             </div>
@@ -739,7 +740,7 @@
 
     <script src="storage.js"></script>
     <script>
-        let currentReportType = "weekly";
+       let currentReportType = "daily";
         var currentTable = "";
         let editingRow = null;
 
@@ -1090,9 +1091,11 @@ row.insertCell(5).innerText = "Confirmed";
                     if (diff <= 7) includeByDate = true;
                 } else if (type === "monthly") {
                     if (rowDate.getMonth() === now.getMonth() && rowDate.getFullYear() === now.getFullYear()) includeByDate = true;
-                } else if (type === "yearly") {
-                    if (rowDate.getFullYear() === now.getFullYear()) includeByDate = true;
-                }
+                }  else if (type === "daily") {
+    if (rowDate.toDateString() === now.toDateString()) {
+        includeByDate = true;
+    }
+}
 
                 // 2. The Fix: Show the row if the date matches, regardless of status
                 if (includeByDate) {
@@ -1218,7 +1221,7 @@ row.insertCell(5).innerText = "Confirmed";
             });
 
         });
-        const reportBtns = ["weeklyBtn", "monthlyBtn", "yearlyBtn"];
+        const reportBtns = ["weeklyBtn", "monthlyBtn", "dailyBtn"];
 
         reportBtns.forEach(id => {
             const btn = document.getElementById(id);
