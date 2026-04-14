@@ -603,7 +603,10 @@
                 <p id="roleText" style="font-size: 12px; color: gray; margin: 0;"></p>
             </div>
         </div>
+        <div style="display:flex; gap:10px;">
+        <button onclick="openChangePassword()">Change Password</button>
         <button id="logoutBtn">Logout</button>
+        </div>
     </header>
 
     <nav class="tabs">
@@ -1535,7 +1538,70 @@ function updateQuickCards() {
     document.getElementById("quickResCount").innerText = resCount;
     document.getElementById("quickTrainCount").innerText = trainCount;
 }
+
+// Change Password Functions 
+
+function openChangePassword(){
+document.getElementById("changePasswordModal").style.display="flex";
+}
+
+function closeChangePassword(){
+document.getElementById("changePasswordModal").style.display="none";
+}
+
+function changePassword(){
+
+const oldPass = document.getElementById("oldPassword").value;
+const newPass = document.getElementById("newPasswordChange").value;
+const confirmPass = document.getElementById("confirmPassword").value;
+
+let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+let users = JSON.parse(localStorage.getItem("systemUsers")) || [];
+
+if(oldPass !== currentUser.password){
+alert("Current password incorrect");
+return;
+}
+
+if(newPass !== confirmPass){
+alert("Passwords do not match");
+return;
+}
+
+users.forEach(user=>{
+if(user.username === currentUser.username){
+user.password = newPass;
+}
+});
+
+localStorage.setItem("systemUsers",JSON.stringify(users));
+
+currentUser.password = newPass;
+localStorage.setItem("currentUser",JSON.stringify(currentUser));
+
+alert("Password changed successfully");
+
+closeChangePassword();
+}
                                 
 </script>
+// Change Password model
+<div id="changePasswordModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+
+<div style="background:white; padding:25px; border-radius:12px; width:320px; text-align:center;">
+
+<h3>Change Password</h3>
+
+<input type="password" id="oldPassword" placeholder="Current Password"><br><br>
+
+<input type="password" id="newPasswordChange" placeholder="New Password"><br><br>
+
+<input type="password" id="confirmPassword" placeholder="Confirm Password"><br><br>
+
+<button onclick="changePassword()">Save</button>
+<button onclick="closeChangePassword()">Cancel</button>
+
+</div>
+</div>
 </body>
 </html>
