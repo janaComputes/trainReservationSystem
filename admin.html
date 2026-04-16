@@ -704,6 +704,7 @@
                         <th>Passenger</th>
                         <th>Train</th>
                         <th>Ticket Type</th>
+                        <th>Seat</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -838,10 +839,12 @@
 <option value="VIP">VIP Ticket</option>
 </select>
             <input type="tel" id="inputPhone" value="+966" maxlength="13" style="display:none;">
-            <input type="number" id="inputSeats" placeholder="Total Seats" min="1" style="display:none;">
+         <input type="number" id="inputStandardSeats" placeholder="Standard Seats" min="1" style="display:none;">
+         <input type="number" id="inputVipSeats" placeholder="VIP Seats" min="1" style="display:none;">
             <input type="time" id="inputDep" style="display:none;">
             <input type="time" id="inputArr" style="display:none;">
-           <input type="number" id="inputPrice" placeholder="Price (SR)" min="1" max="10000" step="0.01" style="display:none;">
+        <input type="number" id="inputStandardPrice" placeholder="Standard Price (SR)" min="1" max="10000" step="0.01" style="display:none;">
+        <input type="number" id="inputVipPrice" placeholder="VIP Price (SR)" min="1" max="10000" step="0.01" style="display:none;">
             <input type="date" id="input3" style="display:none;">
             <button id="saveBtn" style="width: 100%; margin-top: 10px;">Save</button>
             <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
@@ -896,8 +899,19 @@
             document.getElementById("modal").style.display = "flex";
             currentTable = type;
             document.getElementById("modalTitle").innerText = "Add " + type;
-            const fields = ["input1", "input2", "input3", "inputPhone", "inputSeats", "inputDep", "inputArr", "inputPrice", "passengerSelect", "trainSelect"];
-            fields.forEach(id => document.getElementById(id).style.display = "none");
+            const fields = [
+"input1",
+"input2",
+"input3",
+"inputPhone",
+"inputStandardSeats",
+"inputVipSeats",
+"inputDep",
+"inputArr",
+"inputStandardPrice",
+"inputVipPrice"
+];
+fields.forEach(id => document.getElementById(id).style.display = "none");
 
             if (type === "Reservation") {
                 populateDropdowns();
@@ -916,10 +930,18 @@
     document.getElementById("inputPhone").value = "+966";
 }
              else if (type === "Train") {
-                ["input1", "input2", "inputSeats", "inputDep", "inputArr", "inputPrice"].forEach(id => document.getElementById(id).style.display = "block");
-                document.getElementById("input1").placeholder = "Train Name";
-                document.getElementById("input2").placeholder = "Route";
-            }
+
+["input1","input2","inputStandardSeats","inputVipSeats","inputDep","inputArr","inputStandardPrice","inputVipPrice"].forEach(id =>
+document.getElementById(id).style.display = "block"
+);
+
+document.getElementById("inputStandardSeats").placeholder = "Standard Seats";
+document.getElementById("inputVipSeats").placeholder = "VIP Seats";
+
+document.getElementById("inputStandardPrice").placeholder = "Standard Price";
+document.getElementById("inputVipPrice").placeholder = "VIP Price";
+
+}
         }
 
         function closeModal() {
@@ -931,7 +953,8 @@
         document.getElementById("saveBtn").onclick = function () {
             let v1, v2;
             const vPhone = document.getElementById("inputPhone").value.trim();
-            const vSeats = document.getElementById("inputSeats").value;
+        const vStandardSeats = document.getElementById("inputStandardSeats").value;
+        const vVipSeats = document.getElementById("inputVipSeats").value;
             const vDate = document.getElementById("input3").value;
             const ticketType = document.getElementById("ticketType").value;
 
@@ -940,23 +963,68 @@
                 v1 = document.getElementById("passengerSelect").value;
                 v2 = document.getElementById("trainSelect").value;
                 if (!v1 || !v2 || !vDate) { alert("Select a passenger and train."); return; }
+            //     // Generate unique seat number
+            //     let seatNumber = 1;
+
+            //     document.querySelectorAll("#reservationTable tr").forEach(r => {
+            //     if (r.cells.length > 5 && r.cells[2].innerText === v2) {
+            //     seatNumber++;
+            //     }
+            //    });
 
                 // SEAT LOGIC: Check availability before doing anything else
                 let trainFound = false;
-                let trainRows = document.querySelectorAll("#trainTable tr");
+ let trainRows = document.querySelectorAll("#trainTable tr");
 
-                for (let tr of trainRows) {
-                    if (tr.cells[1] && tr.cells[1].innerText === v2) {
-                        let avail = parseInt(tr.cells[4].innerText);
-                        if (avail <= 0) { alert("This train is full!"); return; }
+for (let row of trainRows) {
 
-                        // Deduct seat and update UI
-                        tr.cells[4].innerText = --avail;
-                        if (avail === 0) { tr.cells[5].innerText = "Full"; tr.cells[5].style.color = "red"; }
-                        trainFound = true;
-                        break;
-                    }
-                }
+    if (row.cells.length > 1 && row.cells[1].innerText === v2) {
+
+        trainFound = true;
+
+        let standardLeft = parseInt(row.dataset.standardAvailable || "0");
+        let vipLeft = parseInt(row.dataset.vipAvailable || "0");
+
+        if (ticketType === "Standard") {
+
+            if (standardLeft <= 0) {
+                alert("No Standard seats left.");
+                return;
+            }
+
+            standardLeft--;
+            row.dataset.standardAvailable = standardLeft;
+
+        } else if (ticketType === "VIP") {
+
+            if (vipLeft <= 0) {
+                alert("No VIP seats left.");
+                return;
+            }
+
+            vipLeft--;
+            row.dataset.vipAvailable = vipLeft;
+        }
+
+        let totalLeft = standardLeft + vipLeft;
+        row.cells[4].innerText = totalLeft;
+
+        break;
+    }
+}
+
+                // for (let tr of trainRows) {
+                //     if (tr.cells[1] && tr.cells[1].innerText === v2) {
+                //         let avail = parseInt(tr.cells[4].innerText);
+                //         if (avail <= 0) { alert("This train is full!"); return; }
+
+                //         // Deduct seat and update UI
+                //         tr.cells[4].innerText = --avail;
+                //         if (avail === 0) { tr.cells[5].innerText = "Full"; tr.cells[5].style.color = "red"; }
+                //         trainFound = true;
+                //         break;
+                //     }
+                // }
                 if (!trainFound) { alert("Error: Train details not found."); return; }
 
    } else if (currentTable === "Passenger") {
@@ -989,30 +1057,53 @@
     document.getElementById("inputPhone").value = "+966" + phoneInput;
 }
 
-             else if (currentTable === "Train") {
-                v1 = document.getElementById("input1").value.trim();
-                v2 = document.getElementById("input2").value.trim();
-                const dep = document.getElementById("inputDep").value;
-                const arr = document.getElementById("inputArr").value;
-                const price = parseFloat(document.getElementById("inputPrice").value);
+ else if (currentTable === "Train") {
 
-if (!v1 || !v2 || !vSeats || !dep || !arr || price === "") {
-    alert("Fill all train fields.");
-    return;
+    v1 = document.getElementById("input1").value.trim();
+    v2 = document.getElementById("input2").value.trim();
+
+    const dep = document.getElementById("inputDep").value;
+    const arr = document.getElementById("inputArr").value;
+
+    const vStandardPrice = parseFloat(document.getElementById("inputStandardPrice").value);
+    const vVipPrice = parseFloat(document.getElementById("inputVipPrice").value);
+
+    const vStandardSeats = parseInt(document.getElementById("inputStandardSeats").value);
+    const vVipSeats = parseInt(document.getElementById("inputVipSeats").value);
+
+    const totalSeats = vStandardSeats + vVipSeats;
+
+    if (!v1 || !v2 || !vStandardSeats || !vVipSeats || !dep || !arr) {
+        alert("Fill all train fields.");
+        return;
+    }
+
+    if (arr <= dep) {
+        alert("Arrival must be after departure.");
+        return;
+    }
+
+    const table = document.getElementById("trainTable");
+
+    // يمنع إضافة صفين
+    const row = table.insertRow();
+
+    row.insertCell(0).innerText = "T" + Math.floor(Math.random() * 1000);
+    row.insertCell(1).innerText = v1;
+    row.insertCell(2).innerText = v2;
+    row.insertCell(3).innerText = totalSeats;
+    row.insertCell(4).innerText = totalSeats;
+    row.insertCell(5).innerText = "Available";
+    row.insertCell(6).innerText = dep;
+    row.insertCell(7).innerText = arr;
+    row.insertCell(8).innerText = `STD ${vStandardPrice} / VIP ${vVipPrice}`;
+
+    row.dataset.standardAvailable = vStandardSeats;
+    row.dataset.vipAvailable = vVipSeats;
+
+    closeModal();
+    return; // هذا يمنع الكود من الاستمرار وإضافة صف ثاني
 }
-
-if (price <= 0) {
-    alert("Ticket price must be greater than 0.");
-    return;
-}
-
-if (price > 10000) {
-    alert("Ticket price seems too high.");
-    return;
-}
-                if (arr <= dep) { alert("Arrival must be after departure."); return; }
-            }
-
             // 2. CREATE THE ROW (Only if validation passed)
             if (editingRow) editingRow.remove();
             const table = document.getElementById(currentTable.toLowerCase() + "Table");
@@ -1025,19 +1116,62 @@ if (price > 10000) {
             row.insertCell(2).innerText = v2;
 
             if (currentTable === "Train") {
-                row.insertCell(3).innerText = vSeats;
-                row.insertCell(4).innerText = vSeats;
-                row.insertCell(5).innerText = "Available";
-                row.insertCell(6).innerText = document.getElementById("inputDep").value;
-                row.insertCell(7).innerText = document.getElementById("inputArr").value;
-                row.insertCell(8).innerText = parseFloat(document.getElementById("inputPrice").value).toFixed(2) + " SR";
-            } else if (currentTable === "Passenger") {
+    const totalSeats = vStandardSeats + vVipSeats;
+
+    row.insertCell(3).innerText = totalSeats;
+    row.insertCell(4).innerText = totalSeats;
+    row.insertCell(5).innerText = "Available";
+    row.insertCell(6).innerText = dep;
+    row.insertCell(7).innerText = arr;
+    row.insertCell(8).innerText = `STD ${vStandardPrice.toFixed(2)} / VIP ${vVipPrice.toFixed(2)} SR`;
+
+    row.dataset.standardSeats = vStandardSeats;
+    row.dataset.vipSeats = vVipSeats;
+    row.dataset.standardAvailable = vStandardSeats;
+    row.dataset.vipAvailable = vVipSeats;
+    row.dataset.standardPrice = vStandardPrice;
+    row.dataset.vipPrice = vVipPrice;
+} else if (currentTable === "Passenger") {
                 row.insertCell(3).innerText = vPhone;
             } else {
-                // RESERVATION SPECIFIC
-                row.insertCell(3).innerHTML = ticketType === "VIP" ? "<span class='vip'>VIP</span>" : "Standard";
-row.insertCell(4).innerText = vDate;
-row.insertCell(5).innerText = "Confirmed";
+let seatNumber = 1;
+
+document.querySelectorAll("#reservationTable tr").forEach(r => {
+
+if (r.cells.length > 4) {
+
+const trainName = r.cells[2].innerText;
+
+if (trainName === v2) {
+
+const seatText = r.cells[4].innerText;
+
+if (seatText.includes("Seat")) {
+
+const num = parseInt(seatText.replace("Seat ", ""));
+
+if (!isNaN(num) && num >= seatNumber) {
+seatNumber = num + 1;
+}
+
+}
+
+}
+
+}
+
+});
+// أدخل الأعمدة بالترتيب الصحيح
+row.insertCell(3).innerHTML = ticketType === "VIP" ? "<span class='vip'>VIP</span>" : "Standard";
+row.insertCell(4).innerText = "Seat " + seatNumber;
+row.insertCell(5).innerText = vDate;
+row.insertCell(6).innerText = "Confirmed";
+let actions = row.insertCell(7);
+actions.innerHTML = `
+<button class="edit-btn">Edit</button>
+<button class="cancel-btn">Cancel</button>
+`;
+}
                 // Find Route and Price for History
                 let route = "-", price = "0 SR";
                 document.querySelectorAll("#trainTable tr").forEach(tr => {
@@ -1062,7 +1196,7 @@ row.insertCell(5).innerText = "Confirmed";
              updateDashboard(); 
              updateAllCharts();
              updateQuickCards();
-        };
+        
         function deleteRow(btn) {
             const row = btn.parentElement.parentElement;
 

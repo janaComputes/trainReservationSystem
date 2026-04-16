@@ -20,3 +20,30 @@ function logout(){
 localStorage.removeItem("currentUser");
 window.location.href = "login.html";
 }
+
+// Calculate Seat Occupancy
+function calculateOccupancy() {
+
+let trainsHTML = localStorage.getItem("trains");
+let reservationsHTML = localStorage.getItem("reservations");
+
+if(!trainsHTML || !reservationsHTML){
+document.getElementById("occupancyRate").innerText = "0%";
+return;
+}
+
+let trainsCount = (trainsHTML.match(/<tr>/g) || []).length;
+let reservationsCount = (reservationsHTML.match(/<tr>/g) || []).length;
+
+if(trainsCount === 0){
+document.getElementById("occupancyRate").innerText = "0%";
+return;
+}
+
+let rate = Math.min(100, Math.round((reservationsCount / trainsCount) * 100));
+
+document.getElementById("occupancyRate").innerText = rate + "%";
+
+}
+
+window.onload = calculateOccupancy;
