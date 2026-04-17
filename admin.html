@@ -593,7 +593,7 @@
     </style>
 </head>
 
-<body>
+ <body onload="loadAllData()">
 
     <header class="topbar">
         <div class="logo">
@@ -851,7 +851,7 @@
         </div>
     </div>
 
-    <script src="storage.js"></script>
+     <script src="storage.js"></script> 
     <script>
        let currentReportType = "daily";
         var currentTable = "";
@@ -951,6 +951,38 @@ document.getElementById("inputVipPrice").placeholder = "VIP Price";
         }
 
         document.getElementById("saveBtn").onclick = function () {
+            if(editingRow){
+
+let name = document.getElementById("input1").value;
+let route = document.getElementById("input2").value;
+
+let standard = parseInt(document.getElementById("inputStandardSeats").value);
+let vip = parseInt(document.getElementById("inputVipSeats").value);
+
+let standardPrice = parseFloat(document.getElementById("inputStandardPrice").value);
+let vipPrice = parseFloat(document.getElementById("inputVipPrice").value);
+
+let total = standard + vip;
+
+editingRow.cells[1].innerText = name;
+editingRow.cells[2].innerText = route;
+editingRow.cells[3].innerText = total;
+editingRow.cells[4].innerText = total;
+
+// تحديث السعر
+editingRow.cells[8].innerText = `STD ${standardPrice} / VIP ${vipPrice}`;
+
+editingRow.dataset.standardAvailable = standard;
+editingRow.dataset.vipAvailable = vip;
+
+editingRow.dataset.standardPrice = standardPrice;
+editingRow.dataset.vipPrice = vipPrice;
+editingRow = null;
+saveAllData();
+closeModal();
+
+return;
+}
             let v1, v2;
             const vPhone = document.getElementById("inputPhone").value.trim();
         const vStandardSeats = document.getElementById("inputStandardSeats").value;
@@ -1086,7 +1118,17 @@ for (let row of trainRows) {
     const table = document.getElementById("trainTable");
 
     // يمنع إضافة صفين
-    const row = table.insertRow();
+    let row; 
+
+    if(editingRow){
+        row=editingRow;
+
+    }  else{
+        row=table.insertRow();
+    }
+
+
+    // let totalSeats = Number(standardSeats) + Number(vipSeats);
 
     row.insertCell(0).innerText = "T" + Math.floor(Math.random() * 1000);
     row.insertCell(1).innerText = v1;
@@ -1097,10 +1139,12 @@ for (let row of trainRows) {
     row.insertCell(6).innerText = dep;
     row.insertCell(7).innerText = arr;
     row.insertCell(8).innerText = `STD ${vStandardPrice} / VIP ${vVipPrice}`;
+    row.insertCell(9).innerHTML = '<button onclick="editRow(this)">Edit</button>';
+    saveAllData();
 
     row.dataset.standardAvailable = vStandardSeats;
     row.dataset.vipAvailable = vVipSeats;
-
+editingRow=null;
     closeModal();
     return; // هذا يمنع الكود من الاستمرار وإضافة صف ثاني
 }
@@ -1109,7 +1153,15 @@ for (let row of trainRows) {
             const table = document.getElementById(currentTable.toLowerCase() + "Table");
             if (table.innerHTML.includes("No")) table.innerHTML = "";
 
-            const row = table.insertRow();
+            // const row = table.insertRow();
+            let row;
+
+if (editingRow) {
+    row = editingRow;   // عدّل نفس الصف
+    editingRow = null;  // رجّع الوضع الطبيعي
+} else {
+    row = table.insertRow(); // أضف صف جديد
+}
             const id = (currentTable[0] + Math.floor(Math.random() * 100)).toUpperCase();
             row.insertCell(0).innerText = id;
             row.insertCell(1).innerText = v1;
@@ -1196,6 +1248,25 @@ actions.innerHTML = `
              updateDashboard(); 
              updateAllCharts();
              updateQuickCards();
+
+ function editTrain(btn) {
+
+    const row = btn.parentElement.parentElement;
+
+    const trainName = row.cells[1].innerText;
+    const route = row.cells[2].innerText;
+    const standardSeats = row.cells[3].innerText;
+    const vipSeats = row.cells[4].innerText;
+
+    openModal("Train");
+
+    document.getElementById("input1").value = trainName;
+    document.getElementById("input2").value = route;
+    document.getElementById("inputStandardSeats").value = standardSeats;
+    document.getElementById("inputVipSeats").value = vipSeats;
+
+    editingRow = row;
+}
         
         function deleteRow(btn) {
             const row = btn.parentElement.parentElement;
@@ -1259,14 +1330,39 @@ actions.innerHTML = `
             updateQuickCards();
         }
 
-        function editRow(btn) {
-            editingRow = btn.parentElement.parentElement;
-            const type = editingRow.parentElement.id.replace("Table", "");
-            openModal(type.charAt(0).toUpperCase() + type.slice(1));
-            document.getElementById("input1").value = editingRow.cells[1].innerText;
-            document.getElementById("input2").value = editingRow.cells[2].innerText;
-        }
+   function editRow(btn) {
 
+    editingRow = btn.parentElement.parentElement;
+
+    const type = editingRow.parentElement.id.replace("Table", "");
+
+    openModal(type.charAt(0).toUpperCase() + type.slice(1));
+
+    if (type === "train") {
+
+        document.getElementById("input1").value = editingRow.cells[1].innerText;
+        document.getElementById("input2").value = editingRow.cells[2].innerText;
+
+        document.getElementById("inputDep").value = editingRow.cells[6].innerText;
+        document.getElementById("inputArr").value = editingRow.cells[7].innerText;
+
+        // المقاعد
+        document.getElementById("inputStandardSeats").value = editingRow.dataset.standardSeats;
+        document.getElementById("inputVipSeats").value = editingRow.dataset.vipSeats;
+
+        // الأسعار
+        document.getElementById("inputStandardPrice").value = editingRow.dataset.standardPrice;
+        document.getElementById("inputVipPrice").value = editingRow.dataset.vipPrice;
+    }
+
+    else if (type === "passenger") {
+
+        document.getElementById("input1").value = editingRow.cells[1].innerText;
+        document.getElementById("input2").value = editingRow.cells[2].innerText;
+        document.getElementById("inputPhone").value = editingRow.cells[3].innerText;
+
+    }
+}
         // function populateDropdowns() {
         //     const pS = document.getElementById("passengerSelect"), tS = document.getElementById("trainSelect");
         //     pS.innerHTML = '<option value="">-- Passenger --</option>';
@@ -1737,5 +1833,7 @@ closeChangePassword();
 
 </div>
 </div>
+<script src="storage.js"></script>
+<script src="dashboard.js"></script>
 </body>
 </html>

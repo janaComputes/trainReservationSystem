@@ -1,9 +1,9 @@
 
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-
-if (!currentUser) {
-window.location.replace("login.html");
-}
+let editingRow = null;
+// if (!currentUser) {
+// window.location.replace("login.html");
+// }
 
 
 if(!currentUser){
@@ -47,3 +47,16 @@ document.getElementById("occupancyRate").innerText = rate + "%";
 }
 
 window.onload = calculateOccupancy;
+
+function editTrain(btn) {
+
+    const row = btn.parentElement.parentElement;
+
+    const trainName = row.cells[1].innerText;
+    const route = row.cells[2].innerText;
+    const seats = row.cells[3].innerText;
+
+    document.getElementById("input1").value = trainName;
+    document.getElementById("input2").value = route;
+    document.getElementById("inputStandardSeats").value = seats;
+}
