@@ -850,8 +850,7 @@
             <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
         </div>
     </div>
-
-     <script src="storage.js"></script> 
+<!--  <script src="storage.js"></script>  -->
     <script>
        let currentReportType = "daily";
         var currentTable = "";
@@ -911,8 +910,10 @@
 "inputStandardPrice",
 "inputVipPrice"
 ];
-fields.forEach(id => document.getElementById(id).style.display = "none");
-
+fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {el.style.display = "none";}
+});
             if (type === "Reservation") {
                 populateDropdowns();
                 document.getElementById("input3").value = new Date().toISOString().split('T')[0];
@@ -949,18 +950,50 @@ document.getElementById("inputVipPrice").placeholder = "VIP Price";
             document.querySelectorAll(".modal-box input").forEach(i => i.value = "");
             editingRow = null;
         }
+function openBookingConfirm(passenger, train, date) {
+  const details = document.getElementById("bookingDetails");
+  const modal = document.getElementById("bookingConfirmModal");
+
+  if (!details || !modal) {
+    console.error("booking modal elements not found");
+    return;
+  }
+
+  details.textContent =
+    "Passenger: " + passenger + "\n" +
+    "Train: " + train + "\n" +
+    "Date: " + date;
+
+  modal.style.display = "block";
+}
+function confirmBooking() {
+
+closeBookingModal();
+
+alert("Booking confirmed successfully!");
+
+}
+
+function closeBookingModal(){
+
+document.getElementById("bookingConfirmModal").style.display="none";
+
+}
+
+
 
         document.getElementById("saveBtn").onclick = function () {
+            console.log("SAVE CLICKED");
             if(editingRow){
 
 let name = document.getElementById("input1").value;
 let route = document.getElementById("input2").value;
 
-let standard = parseInt(document.getElementById("inputStandardSeats").value);
-let vip = parseInt(document.getElementById("inputVipSeats").value);
+let standard = parseInt(document.getElementById("inputStandardSeats").value) || 0;
+let vip = parseInt(document.getElementById("inputVipSeats").value) || 0;
 
-let standardPrice = parseFloat(document.getElementById("inputStandardPrice").value);
-let vipPrice = parseFloat(document.getElementById("inputVipPrice").value);
+let standardPrice = parseFloat(document.getElementById("inputStandardPrice").value) || 0;
+let vipPrice = parseFloat(document.getElementById("inputVipPrice").value) || 0;
 
 let total = standard + vip;
 
@@ -979,7 +1012,10 @@ editingRow.dataset.standardPrice = standardPrice;
 editingRow.dataset.vipPrice = vipPrice;
 editingRow = null;
 saveAllData();
-closeModal();
+updateDashboard();
+if (typeof closeModal === "function") {
+    closeModal();
+}
 
 return;
 }
@@ -991,10 +1027,32 @@ return;
             const ticketType = document.getElementById("ticketType").value;
 
             // 1. DATA VALIDATION & ASSIGNMENT
+        
             if (currentTable === "Reservation") {
-                v1 = document.getElementById("passengerSelect").value;
-                v2 = document.getElementById("trainSelect").value;
-                if (!v1 || !v2 || !vDate) { alert("Select a passenger and train."); return; }
+
+  const passengerEl = document.getElementById("passengerSelect");
+  const trainEl = document.getElementById("trainSelect");
+  const dateEl = document.getElementById("input3");
+
+  if (!passengerEl || !trainEl || !dateEl) {
+    alert("Reservation fields not found.");
+    return;
+  }
+
+  const passenger = passengerEl.value;
+  const train = trainEl.value;
+  const date = dateEl.value;
+
+  if (!passenger || !train || !date) {
+    alert("Select a passenger and train.");
+    return;
+  }
+
+  openBookingConfirm(passenger, train, date);
+  
+  v1=passenger;
+  v2=train;
+    
             //     // Generate unique seat number
             //     let seatNumber = 1;
 
@@ -1058,6 +1116,22 @@ for (let row of trainRows) {
                 //     }
                 // }
                 if (!trainFound) { alert("Error: Train details not found."); return; }
+
+                const table = document.getElementById("reservationTable");
+
+let row = table.insertRow();
+
+row.insertCell(0).innerText = "R" + Math.floor(Math.random()*1000);
+row.insertCell(1).innerText = passenger;
+row.insertCell(2).innerText = train;
+row.insertCell(3).innerText = ticketType;
+row.insertCell(4).innerText = "1";
+row.insertCell(5).innerText = date;
+row.insertCell(6).innerText = "Confirmed";
+
+saveAllData();
+updateDashboard();
+closeModal();
 
    } else if (currentTable === "Passenger") {
     v1 = document.getElementById("input1").value.trim();
@@ -1140,10 +1214,12 @@ for (let row of trainRows) {
     row.insertCell(7).innerText = arr;
     row.insertCell(8).innerText = `STD ${vStandardPrice} / VIP ${vVipPrice}`;
     row.insertCell(9).innerHTML = '<button onclick="editRow(this)">Edit</button>';
-    saveAllData();
+    
 
     row.dataset.standardAvailable = vStandardSeats;
     row.dataset.vipAvailable = vVipSeats;
+    saveAllData();
+    updateDashboard();
 editingRow=null;
     closeModal();
     return; // هذا يمنع الكود من الاستمرار وإضافة صف ثاني
@@ -1234,21 +1310,42 @@ actions.innerHTML = `
                 });
                 addToHistory(id, vDate, v1, v2, route, price, "Confirmed");
             }
+const table = document.getElementById(currentTable.toLowerCase() + "Table");
+if (table && table.innerHTML.includes("No")){
+    table.innerHTML = "";
+} 
 
-            const actionCell = row.insertCell(-1);
-            actionCell.innerHTML = `<button onclick="editRow(this)" style="margin-right:5px">Edit</button>
-                            <button onclick="deleteRow(this)" style="background:#cc0000">${currentTable === 'Reservation' ? 'Cancel' : 'Delete'}</button>`;
+let row;
 
-             
-            // 3. FINAL STEPS
-            closeModal();
-            if (typeof saveAllData === "function") saveAllData();
-            updateReportAnalytics();
-            filterReport(currentReportType);
-             updateDashboard(); 
-             updateAllCharts();
-             updateQuickCards();
+if (editingRow) {
+    row = editingRow;
+    editingRow = null;
+} else {
+    row = table.insertRow();
+}
 
+if(row){
+const actionCell = row.insertCell(-1);
+actionCell.innerHTML = `<button onclick="editRow(this)" style="margin-right:5px">Edit</button>
+<button onclick="deleteRow(this)" style="background:#cc0000">${currentTable === 'Reservation' ? 'Cancel' : 'Delete'}</button>`;
+}
+
+// 3. FINAL STEPScloseModal();
+closeModal();
+if (typeof saveAllData === "function") {
+    saveAllData();
+}
+
+setTimeout(() => {
+    updateDashboard();
+    updateAllCharts();
+    updateQuickCards();
+}, 100);
+if (typeof updateReportAnalytics === "function") updateReportAnalytics();
+if (typeof filterReport === "function") filterReport(currentReportType);
+if (typeof updateDashboard === "function") updateDashboard();
+if (typeof updateAllCharts === "function") updateAllCharts();
+if (typeof updateQuickCards === "function") updateQuickCards();
  function editTrain(btn) {
 
     const row = btn.parentElement.parentElement;
@@ -1316,6 +1413,7 @@ actions.innerHTML = `
             // 4. PERSIST AND REFRESH: Save to LocalStorage and update analytics cards
             if (typeof saveAllData === "function") {
                 saveAllData();
+                updateDashboard();
             }
 
             if (typeof updateReportAnalytics === "function") {
@@ -1508,7 +1606,7 @@ function updateReservationChart() {
     rows.forEach(row => {
         if (row.cells.length < 5) return;
 
-        let rawDate = row.cells[4].innerText.trim();
+        let rawDate = row.cells[5].innerText.trim();
         if (!rawDate.includes("-")) return;
 
         let dateObj = new Date(rawDate);
@@ -1565,7 +1663,7 @@ function updatePassengerChart() {
     rows.forEach(row => {
         if (row.cells.length < 5) return;
 
-        let rawDate = row.cells[4].innerText.trim();
+        let rawDate = row.cells[5].innerText.trim();
         if (!rawDate.includes("-")) return;
 
         // 🎯 FORMAT DATE (KEY FIX)
@@ -1712,7 +1810,6 @@ function updateDashboard() {
     let totalSeats = 0;
     let usedSeats = 0;
 
-    // Count trains
     trainRows.forEach(row => {
         if (row.cells.length > 5) {
             totalTrains++;
@@ -1725,29 +1822,44 @@ function updateDashboard() {
         }
     });
 
-    // Count reservations + revenue
     reservationRows.forEach(row => {
-        if (row.cells.length > 5) {
+        if (row.cells.length > 6) {
             totalBookings++;
 
-            let trainName = row.cells[2].innerText;
+            const trainName = row.cells[2].innerText.trim();
+            const ticketType = row.cells[3].innerText.trim();
 
-            // find price from train table
             document.querySelectorAll("#trainTable tr").forEach(tr => {
-                if (tr.cells[1] && tr.cells[1].innerText === trainName) {
-                    let price = parseFloat(tr.cells[8].innerText.replace(" SR", "")) || 0;
-                    totalRevenue += price;
+                if (tr.cells.length > 8 && tr.cells[1].innerText.trim() === trainName) {
+
+                    const priceText = tr.cells[8].innerText.trim();
+
+                    const stdMatch = priceText.match(/STD\s*(\d+(\.\d+)?)/);
+                    const vipMatch = priceText.match(/VIP\s*(\d+(\.\d+)?)/);
+
+                    const stdPrice = stdMatch ? parseFloat(stdMatch[1]) : 0;
+                    const vipPrice = vipMatch ? parseFloat(vipMatch[1]) : 0;
+
+                    if (ticketType.includes("VIP")) {
+                        totalRevenue += vipPrice;
+                    } else {
+                        totalRevenue += stdPrice;
+                    }
                 }
             });
         }
     });
 
     const occupancy = totalSeats > 0 ? ((usedSeats / totalSeats) * 100).toFixed(1) : 0;
+const trainsEl = document.getElementById("totalTrains");
+const bookingsEl = document.getElementById("totalBookingsDash");
+const revenueEl = document.getElementById("totalRevenueDash");
+const occEl = document.getElementById("occupancyRate");
 
-    document.getElementById("totalTrains").innerText = totalTrains;
-    document.getElementById("totalBookingsDash").innerText = totalBookings;
-    document.getElementById("totalRevenueDash").innerText = totalRevenue.toFixed(2) + " SR";
-    document.getElementById("occupancyRate").innerText = occupancy + "%";
+if (trainsEl) trainsEl.innerText = totalTrains;
+if (bookingsEl) bookingsEl.innerText = totalBookings;
+if (revenueEl) revenueEl.innerText = totalRevenue.toFixed(2) + " SR";
+if (occEl) occEl.innerText = occupancy + "%";
 }
 function updateQuickCards() {
 
@@ -1835,5 +1947,19 @@ closeChangePassword();
 </div>
 <script src="storage.js"></script>
 <script src="dashboard.js"></script>
+<div id="bookingConfirmModal"
+style="display:none; position:fixed; top:40%; left:50%; transform:translate(-50%,-50%);
+background:white; padding:20px; border:1px solid gray; border-radius:10px; z-index:999;">
+
+<h3>Confirm Booking</h3>
+
+<p id="bookingDetails"></p>
+
+<br>
+
+<button onclick="confirmBooking()">Confirm</button>
+<button onclick="closeBookingModal()">Cancel</button>
+
+</div>
 </body>
 </html>

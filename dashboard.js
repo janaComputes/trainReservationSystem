@@ -1,62 +1,75 @@
 
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-let editingRow = null;
-// if (!currentUser) {
-// window.location.replace("login.html");
-// }
 
-
-if(!currentUser){
-window.location.href = "login.html";
+if (!currentUser) {
+  window.location.href = "login.html";
 }
 
-if(currentUser.role === "STAFF"){
-
-document.getElementById("addTrain").style.display = "none";
-document.getElementById("addPassenger").style.display = "none";
-
-}
-function logout(){
-localStorage.removeItem("currentUser");
-window.location.href = "login.html";
+function logout() {
+  localStorage.removeItem("currentUser");
+  window.location.href = "login.html";
 }
 
-// Calculate Seat Occupancy
 function calculateOccupancy() {
+  const occupancyEl = document.getElementById("occupancyRate");
+  if (!occupancyEl) return;
 
-let trainsHTML = localStorage.getItem("trains");
-let reservationsHTML = localStorage.getItem("reservations");
+  let trainsHTML = localStorage.getItem("trains");
+  let reservationsHTML = localStorage.getItem("reservations");
 
-if(!trainsHTML || !reservationsHTML){
-document.getElementById("occupancyRate").innerText = "0%";
-return;
+  if (!trainsHTML || !reservationsHTML) {
+    occupancyEl.innerText = "0%";
+    return;
+  }
+
+  let trainsCount = (trainsHTML.match(/<tr>/g) || []).length;
+  let reservationsCount = (reservationsHTML.match(/<tr>/g) || []).length;
+
+  if (trainsCount === 0) {
+    occupancyEl.innerText = "0%";
+    return;
+  }
+
+  let rate = Math.min(100, Math.round((reservationsCount / trainsCount) * 100));
+  occupancyEl.innerText = rate + "%";
 }
 
-let trainsCount = (trainsHTML.match(/<tr>/g) || []).length;
-let reservationsCount = (reservationsHTML.match(/<tr>/g) || []).length;
+window.addEventListener("load", calculateOccupancy);
 
-if(trainsCount === 0){
-document.getElementById("occupancyRate").innerText = "0%";
-return;
+function openBookingConfirm(passenger, train, date){
+
+document.getElementById("bookingDetails").innerText =
+"Passenger: " + passenger +
+"\nTrain: " + train +
+"\nDate: " + date;
+
+document.getElementById("bookingConfirmModal").style.display = "block";
+
 }
 
-let rate = Math.min(100, Math.round((reservationsCount / trainsCount) * 100));
+function closeBookingModal() {
+  const modal = document.getElementById("bookingConfirmModal");
+  if (modal) modal.style.display = "none";
+}
 
-document.getElementById("occupancyRate").innerText = rate + "%";
+function confirmBooking() {
+  closeBookingModal();
+  alert("Booking confirmed successfully!");
+}
+function updateDashboardStats(){
+
+let trains = localStorage.getItem("trains") || "";
+let reservations = localStorage.getItem("reservations") || "";
+
+let trainCount = (trains.match(/<tr>/g) || []).length;
+let reservationCount = (reservations.match(/<tr>/g) || []).length;
+
+let passengerCount = reservationCount;
+
+document.getElementById("totalTrains").innerText = trainCount;
+document.getElementById("totalReservations").innerText = reservationCount;
+document.getElementById("totalPassengers").innerText = passengerCount;
 
 }
 
-window.onload = calculateOccupancy;
-
-function editTrain(btn) {
-
-    const row = btn.parentElement.parentElement;
-
-    const trainName = row.cells[1].innerText;
-    const route = row.cells[2].innerText;
-    const seats = row.cells[3].innerText;
-
-    document.getElementById("input1").value = trainName;
-    document.getElementById("input2").value = route;
-    document.getElementById("inputStandardSeats").value = seats;
-}
+window.addEventListener("load", updateDashboardStats);
