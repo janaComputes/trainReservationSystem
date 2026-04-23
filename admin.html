@@ -1953,12 +1953,12 @@
 
                 html += `
         <p>🚆 ${r.train} - ${r.date} - ${r.status}</p>
-        <p>🎫 Type: ${type} </p>
+        <p>🎫 Type: ${r.type} </p>
         <hr>
     `;
             });
-            let totalSeats = userReservations.reduce((sum, r) => sum + (r.seatsNeeded || 1), 0);
-            html += `<p><b>Total Tickets Booked:</b> ${totalSeats}</p>`;
+            //let totalSeats = userReservations.reduce((sum, r) => sum + (r.seatsNeeded || 1), 0);
+           // html += `<p><b>Total Tickets Booked:</b> ${totalSeats}</p>`;
             document.getElementById("profileContent").innerHTML = html;
             document.getElementById("profileModal").style.display = "flex";
         }
