@@ -812,8 +812,7 @@
                 </div>
                 <p style="color: gray; font-size: 14px; margin-top: 5px;">Detailed insights and booking history</p>
             </div>
-            <button id="exportReport" style="background:#0b1c3f; color: white; border-radius: 5px;">📥 Export
-                Report</button>
+        
         </div>
 
         <div class="reports-stats">
@@ -890,6 +889,7 @@
         window.onload = function () {
             if (typeof loadAllData === "function") loadAllData();
 
+
             updateReportAnalytics();
             filterReport(currentReportType);
 
@@ -930,7 +930,7 @@
             alert("Logging out...");
 
             // 3. Redirect back to login
-            // Using .replace is better for security so they can't click 'Back' 
+            // Using .replace is better for security so they can't click 'Back'
             window.location.replace("login.html");
         }
 
@@ -1082,14 +1082,19 @@
 
                 if (!passenger || !train || !date) {
                     alert("Select a passenger and train."); return;
-
-
                 }
 
+                let route = "-";
+                let price = "0 SR";
                 let trainFound = false;
+
+                // Search trainTable for route and price
                 document.querySelectorAll("#trainTable tr").forEach(row => {
                     if (row.cells[1] && row.cells[1].innerText === train) {
                         trainFound = true;
+                        route = row.cells[2].innerText;
+
+                        // Deduct seat
                         let stdAvail = parseInt(row.dataset.standardAvailable || 0);
                         let vipAvail = parseInt(row.dataset.vipAvailable || 0);
 
@@ -1100,42 +1105,28 @@
                             if (vipAvail <= 0) { alert("No VIP seats left."); return; }
                             row.dataset.vipAvailable = --vipAvail;
                         }
+                        row.cells[4].innerText = stdAvail + vipAvail;
 
-                        let newTotal = stdAvail + vipAvail;
-                        row.cells[4].innerText = newTotal;
-                        if (newTotal <= 0) {
-                            row.cells[5].innerText = "Full";
-                            row.cells[5].style.color = "red";
-                        }
+                        // Extract Price
+                        const priceText = row.cells[8].innerText;
+                        const match = ticketType === "VIP" ? priceText.match(/VIP\s*(\d+)/) : priceText.match(/STD\s*(\d+)/);
+                        price = match ? match[1] + " SR" : "0 SR";
                     }
                 });
 
                 if (!trainFound) return;
 
-                // Inside your saveBtn.onclick -> Reservation block:
-                let route = "-";
-                let price = "0 SR";
+                const resID = "R" + (document.querySelectorAll("#reservationTable tr").length + 10);
 
-                // Find the route and price from the train table to put in the report
-                document.querySelectorAll("#trainTable tr").forEach(tr => {
-                    if (tr.cells[1] && tr.cells[1].innerText === train) {
-                        route = tr.cells[2].innerText;
-                        // Parse the price based on ticket type
-                        const priceText = tr.cells[8].innerText;
-                        if (ticketType === "VIP") {
-                            const match = priceText.match(/VIP\s*(\d+(\.\d+)?)/);
-                            price = match ? match[1] + " SR" : "0 SR";
-                        } else {
-                            const match = priceText.match(/STD\s*(\d+(\.\d+)?)/);
-                            price = match ? match[1] + " SR" : "0 SR";
-                        }
-                    }
-                });
+                // 1. Add to History
+                addToHistory(resID, date, passenger, train, ticketType, route, "1", price, "Confirmed");
 
-                // ADD TO HISTORY CALL:
-                addToHistory("R" + (document.querySelectorAll("#reservationTable tr").length + 10), date, passenger, train, ticketType, route, price, "Confirmed");
+                // 2. Add to Main Table
+                insertNewRow([resID, passenger, train, ticketType, "1", date, "Confirmed"]);
 
-                insertNewRow(["R" + (document.querySelectorAll("#reservationTable tr").length + 10), passenger, train, ticketType, "1", date, "Confirmed"]);
+                // 3. THE FIX: Force the Reports cards to recalculate NOW
+                updateReportAnalytics();
+
                 finishSave();
                 return;
             }
@@ -1380,108 +1371,114 @@
                 }
             });
         }
-        function addToHistory(id, d, p, t, r, pr, s) {
+        function addToHistory(id, date, passenger, train, ticketType, route, seats, price, status) {
             const hT = document.getElementById("historyTable");
-            // Remove the "No history" row if it exists
             if (hT.innerHTML.includes("No history") || hT.innerHTML.trim() === "") hT.innerHTML = "";
 
             const row = hT.insertRow(0);
-            // Note: Column 4 is Ticket Type, Column 5 is Route, Column 6 is Seats
+            // index 0: ID, 1: Date, 2: Passenger, 3: Train, 4: Ticket Type, 5: Route, 6: Seats, 7: Price, 8: Status
             row.innerHTML = `
         <td>${id}</td>
-        <td>${d}</td>
-        <td>${p}</td>
-        <td>${t}</td>
+        <td>${date}</td>
+        <td>${passenger}</td>
+        <td>${train}</td>
         <td>${ticketType === "VIP" ? "<span class='vip'>VIP</span>" : "Standard"}</td>
-        <td>${r}</td>
-        <td>1</td>
-        <td>${pr}</td>
-        <td><span style="color:${s === 'Confirmed' ? 'green' : 'red'}">${s}</span></td>
+        <td>${route}</td>
+        <td>${seats}</td>
+        <td>${price}</td>
+        <td><span style="color:${status === 'Confirmed' ? 'green' : 'red'}">${status}</span></td>
     `;
         }
 
 
         function updateReportAnalytics() {
-            const historyRows = document.querySelectorAll("#historyTable tr");
-            let totalRev = 0;
-            let confirmedCount = 0;
-
-            historyRows.forEach(row => {
-                // Price is in cell index 7, Status is in index 8
-                if (row.cells[8] && row.cells[8].innerText.includes("Confirmed")) {
-                    const priceText = row.cells[7].innerText.replace(" SR", "");
-                    totalRev += parseFloat(priceText || 0);
-                    confirmedCount++;
-                }
-            });
-
-            // Update the visual cards
-            const revDash = document.getElementById("totalRevenue");
-            const bookDash = document.getElementById("totalBookings");
-            const avgDash = document.getElementById("avgPrice");
-
-            if (revDash) revDash.innerText = totalRev.toFixed(2) + " SR";
-            if (bookDash) bookDash.innerText = confirmedCount;
-            if (avgDash) {
-                const avg = confirmedCount > 0 ? (totalRev / confirmedCount).toFixed(2) : 0;
-                avgDash.innerText = avg + " SR";
-            }
-
-            document.getElementById("totalRevenue").innerText = totalRev.toFixed(2) + " SR";
-            document.getElementById("totalBookings").innerText = confirmedCount;
-
-            const avg = confirmedCount > 0 ? (totalRev / confirmedCount).toFixed(2) : 0;
-            document.getElementById("avgPrice").innerText = avg + " SR";
-        }
-        function filterReport(type) {
             const rows = document.querySelectorAll("#historyTable tr");
-            const now = new Date();
             let totalRev = 0;
-            let bookings = 0;
+            let count = 0;
 
             rows.forEach(row => {
-                if (row.cells.length < 8) return;
+                // Look at index 8 for status, index 7 for price
+                if (row.cells.length >= 9 && row.cells[8].innerText.includes("Confirmed")) {
 
-                const dateText = row.cells[1].innerText;
-                const rowDate = new Date(dateText + "T00:00:00");
-                let includeByDate = false;
+                    // This line strips away "SR" and any spaces so parseFloat only sees numbers
+                    let cleanPrice = row.cells[7].innerText.replace(/[^\d.-]/g, '');
+                    let priceNum = parseFloat(cleanPrice);
 
-                // 1. Date Range Check
-                if (type === "weekly") {
-                    const diff = (now - rowDate) / (1000 * 60 * 60 * 24);
-                    if (diff <= 7) includeByDate = true;
-                } else if (type === "monthly") {
-                    if (rowDate.getMonth() === now.getMonth() && rowDate.getFullYear() === now.getFullYear()) includeByDate = true;
-                } else if (type === "daily") {
-                    if (rowDate.toDateString() === now.toDateString()) {
-                        includeByDate = true;
+                    if (!isNaN(priceNum)) {
+                        totalRev += priceNum;
+                        count++;
                     }
-                }
-
-                // 2. The Fix: Show the row if the date matches, regardless of status
-                if (includeByDate) {
-                    row.style.display = ""; // This makes Canceled rows visible!
-
-                    // Only add to analytics cards if confirmed
-                    if (row.cells[7].innerText.includes("Confirmed")) {
-                        const price = parseFloat(row.cells[6].innerText.replace(" SR", "")) || 0;
-                        totalRev += price;
-                        bookings++;
-                    }
-                } else {
-                    row.style.display = "none";
                 }
             });
 
-            // 3. Update the visual cards
-            document.getElementById("totalRevenue").innerText = totalRev.toFixed(2) + " SR";
-            document.getElementById("totalBookings").innerText = bookings;
-            const avg = bookings > 0 ? (totalRev / bookings).toFixed(2) : 0;
-            document.getElementById("avgPrice").innerText = avg + " SR";
+            // Update the UI
+            const revEl = document.getElementById("totalRevenue");
+            const bookEl = document.getElementById("totalBookings");
+            const avgEl = document.getElementById("avgPrice");
+
+            if (revEl) revEl.innerText = totalRev.toFixed(2) + " SR";
+            if (bookEl) bookEl.innerText = count;
+            if (avgEl) {
+                let avg = count > 0 ? (totalRev / count).toFixed(2) : 0;
+                avgEl.innerText = avg + " SR";
+            }
         }
 
+
+        function filterReport(type) {
+    const rows = document.querySelectorAll("#historyTable tr");
+    const now = new Date();
+    let totalRev = 0;
+    let bookings = 0;
+
+    rows.forEach(row => {
+        // Must have 9 cells to be a valid report row
+        if (row.cells.length < 9) return;
+
+        const dateText = row.cells[1].innerText; // Date is at index 1
+        const rowDate = new Date(dateText + "T00:00:00");
+        let includeByDate = false;
+
+        // 1. Check if the row falls within the selected time range
+        if (type === "daily") {
+            if (rowDate.toDateString() === now.toDateString()) includeByDate = true;
+        } else if (type === "weekly") {
+            const diff = (now - rowDate) / (1000 * 60 * 60 * 24);
+            if (diff <= 7) includeByDate = true;
+        } else if (type === "monthly") {
+            if (rowDate.getMonth() === now.getMonth() && rowDate.getFullYear() === now.getFullYear()) {
+                includeByDate = true;
+            }
+        }
+
+        // 2. Show or Hide the row based on the date
+        if (includeByDate) {
+            row.style.display = ""; 
+
+            // 3. Update the analytics for the filtered view
+            // Check status at index 8 and price at index 7
+            if (row.cells[8].innerText.includes("Confirmed")) {
+                const priceText = row.cells[7].innerText.replace(/[^\d.-]/g, '');
+                const priceNum = parseFloat(priceText);
+                if (!isNaN(priceNum)) {
+                    totalRev += priceNum;
+                    bookings++;
+                }
+            }
+        } else {
+            row.style.display = "none";
+        }
+    });
+
+    // 4. Update the cards with the filtered totals
+    document.getElementById("totalRevenue").innerText = totalRev.toFixed(2) + " SR";
+    document.getElementById("totalBookings").innerText = bookings;
+    const avg = bookings > 0 ? (totalRev / bookings).toFixed(2) : 0;
+    document.getElementById("avgPrice").innerText = avg + " SR";
+}
+
         document.getElementById("logoutBtn").onclick = () => { localStorage.removeItem("role"); window.location.href = "login.html"; };
-        //dashboard 
+        //dashboard
         function goToTab(tabName) {
             // remove active from all tabs
             document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -1790,7 +1787,7 @@
             document.getElementById("quickTrainCount").innerText = trainCount;
         }
 
-        // Change Password Functions 
+        // Change Password Functions
 
         function openChangePassword() {
             document.getElementById("changePasswordModal").style.display = "flex";
@@ -1868,6 +1865,130 @@
             });
         }
 
+
+        function openChangePassword() {
+            document.getElementById("changePasswordModal").style.display = "flex";
+        }
+
+        function closeChangePassword() {
+            document.getElementById("changePasswordModal").style.display = "none";
+        }
+
+        function changePassword() {
+
+            const oldPass = document.getElementById("oldPassword").value;
+            const newPass = document.getElementById("newPasswordChange").value;
+            const confirmPass = document.getElementById("confirmPassword").value;
+
+            let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+            let users = JSON.parse(localStorage.getItem("systemUsers")) || [];
+
+            if (oldPass !== currentUser.password) {
+                alert("Current password incorrect");
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                alert("Passwords do not match");
+                return;
+            }
+
+            users.forEach(user => {
+                if (user.username === currentUser.username) {
+                    user.password = newPass;
+                }
+            });
+
+            localStorage.setItem("systemUsers", JSON.stringify(users));
+
+            currentUser.password = newPass;
+            localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+            alert("Password changed successfully");
+
+            closeChangePassword();
+        }
+        function openPassengerProfile(btn) {
+            const row = btn.parentElement.parentElement;
+
+            const id = row.cells[0].innerText;
+            const name = row.cells[1].innerText;
+            const email = row.cells[2].innerText;
+            const phone = row.cells[3].innerText;
+
+            let reservations = JSON.parse(localStorage.getItem("trainHistory") || "[]");
+
+            let userReservations = reservations
+                .filter(r => r.passenger === name)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            // 👆 ترتيب من الأحدث إلى الأقدم
+
+            let html = `
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Phone:</b> ${phone}</p>
+        <hr>
+        <h4>Reservations:</h4>
+    `;
+
+            userReservations.forEach(r => {
+                let type = r.ticketType === "VIP"
+                    ? "<span style='background:#fff7d6;color:#c79b00;padding:3px 8px;border-radius:6px;font-weight:bold;'>VIP</span>"
+                    : "Standard";
+
+                html += `
+        <p>🚆 ${r.train} - ${r.date} - ${r.status}</p>
+        <p>🎫 Type: ${type} </p>
+        <hr>
+    `;
+            });
+            // let totalSeats = userReservations.reduce((sum, r) => sum + (r.seatsNeeded || 1), 0);
+            // html += `<p><b>Total Tickets Booked:</b> ${totalSeats}</p>`;
+            document.getElementById("profileContent").innerHTML = html;
+            document.getElementById("profileModal").style.display = "flex";
+        }
+
+        function closeProfile() {
+            document.getElementById("profileModal").style.display = "none";
+        }
+
+        let dateSortAsc = true;
+
+        function sortReservationsByDate() {
+            const table = document.getElementById("reservationTable");
+
+            // خذ كل الصفوف
+            let rows = Array.from(table.querySelectorAll("tr"));
+
+            // فصل الصف الوهمي (No reservations)
+            let placeholder = rows.find(r => r.cells.length === 1 || r.cells[0]?.colSpan);
+
+            // صفوف حقيقية فقط
+            let dataRows = rows.filter(r => r !== placeholder);
+
+            if (dataRows.length === 0) return;
+
+            dataRows.sort((a, b) => {
+                const aDate = new Date(a.cells[4].innerText);
+                const bDate = new Date(b.cells[4].innerText);
+
+                return dateSortAsc ? aDate - bDate : bDate - aDate;
+            });
+
+            // امسح الجدول
+            table.innerHTML = "";
+
+            // رجع البيانات
+            dataRows.forEach(r => table.appendChild(r));
+
+            // رجع الصف الوهمي في النهاية (إذا موجود)
+            if (placeholder) {
+                table.appendChild(placeholder);
+            }
+
+            dateSortAsc = !dateSortAsc;
+        }
+
     </script>
 
     <div id="changePasswordModal"
@@ -1903,6 +2024,35 @@ background:white; padding:20px; border:1px solid gray; border-radius:10px; z-ind
         <button onclick="closeBookingModal()">Cancel</button>
 
     </div>
+
+
+    <div id="changePasswordModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+
+        <div style="background:white; padding:25px; border-radius:12px; width:320px; text-align:center;">
+
+            <h3>Change Password</h3>
+
+            <input type="password" id="oldPassword" placeholder="Current Password"><br><br>
+
+            <input type="password" id="newPasswordChange" placeholder="New Password"><br><br>
+
+            <input type="password" id="confirmPassword" placeholder="Confirm Password"><br><br>
+
+            <button onclick="changePassword()">Save</button>
+            <button onclick="closeChangePassword()">Cancel</button>
+
+        </div>
+    </div>
+    <div id="profileModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+        <div style="background:white; padding:20px; border-radius:10px; width:300px;">
+            <h3>Passenger Profile</h3>
+            <div id="profileContent" style="overflow-y:auto; max-height:300px; margin:10px 0;"></div>
+            <button onclick="closeProfile()">Close</button>
+        </div>
+    </div>
+
 </body>
 
 </html>
