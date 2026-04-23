@@ -1,134 +1,223 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Admin Dashboard</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-body{
-font-family:Arial;
-background:#f5f6fa;
-margin:20px;
-}
-
-.dashboard{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:20px;
-margin-bottom:30px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 10px rgba(0,0,0,0.1);
-text-align:center;
-}
-
-.chart-container{
-width:100%;
-max-width:500px;
-margin-bottom:40px;
-}
-
-</style>
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
 
 </head>
+<!-- <script>
+document.addEventListener("DOMContentLoaded", function() {
+    const loginForm = document.getElementById("loginForm");
+
+    loginForm.addEventListener("submit", function(e){
+        e.preventDefault();
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+       const users = JSON.parse(localStorage.getItem("systemUsers")) || [];
+
+        const user = users.find(u => u.username === username && u.password === password);
+
+        
+    });
+});
+</script> -->
 <body>
 
-<h1>Admin Dashboard</h1>
+<div class="login-container">
 
-<div class="dashboard">
+<div class="icon"><img src="images/f7dc4aac-6a9c-42e3-b3f6-56ec23995dcf-removebg-preview.png" alt="train logo"style="width: 80px; height: auto"></div>
 
-<div class="card">
-<h3>Total Trains</h3>
-<p id="totalTrains">0</p>
+<h2>Train Reservation System</h2>
+<p class="subtitle">Sign in to manage reservations and passengers</p>
+
+<form id="loginForm">
+<div id="verificationContainer" style="display:none; text-align:center; margin-top:20px;">
+    <h3>Email Verification</h3>
+    <p>Enter the 4-digit code sent to your email:</p>
+    <div id="codeBoxesContainer" style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
+        <input type="text" maxlength="1" class="codeBox" disabled />
+        <input type="text" maxlength="1" class="codeBox" disabled />
+        <input type="text" maxlength="1" class="codeBox" disabled />
+        <input type="text" maxlength="1" class="codeBox" disabled />
+    </div>
+    <button id="verifyCodeBtn" style="margin-top:15px; padding:10px 20px; font-size:16px; cursor:pointer;">Verify</button>
+    <p id="codeError" style="color:red; margin-top:10px;"></p>
 </div>
 
-<div class="card">
-<h3>Total Passengers</h3>
-<p id="totalPassengers">0</p>
+<style>
+.codeBox {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.2s;
+}
+.codeBox:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px #007bff;
+}
+#verifyCodeBtn:hover {
+    background-color: #007bff;
+    color: white;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const loginForm = document.getElementById("loginForm");
+    const verificationContainer = document.getElementById("verificationContainer");
+    const codeBoxes = document.querySelectorAll(".codeBox");
+    const verifyBtn = document.getElementById("verifyCodeBtn");
+    const codeError = document.getElementById("codeError");
+    let verificationCode = "";
+
+    loginForm.addEventListener("submit", function(e){
+        e.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const users = JSON.parse(localStorage.getItem("systemUsers")) || [];
+
+        const user = users.find(u => u.username === username && u.password === password);
+        if(user){
+            localStorage.setItem("currentUser", JSON.stringify(user));
+            localStorage.setItem("role", user.role);
+
+            // توليد رمز 4 أرقام عشوائي
+            verificationCode = Math.floor(1000 + Math.random()*9000).toString();
+            console.log("Verification code (for testing):", verificationCode);
+
+            // إظهار المربعات فارغة
+            codeBoxes.forEach(box => box.value = "");
+            verificationContainer.style.display = "block";
+
+            // تعبئة الأرقام تلقائيًا بعد 2 ثانية
+            setTimeout(() => {
+                codeBoxes.forEach((box, idx) => {
+                    setTimeout(() => {
+                        box.value = verificationCode[idx];
+                    }, idx * 300); // كل رقم يظهر بعد 300ms عن الرقم السابق
+                });
+            }, 2000); // الانتظار ثانيتين قبل البدء
+
+        } else {
+            document.getElementById("error").innerText = "Invalid username or password!";
+        }
+    });
+
+    // التحقق عند الضغط على زر Verify
+    verifyBtn.addEventListener("click", function(){
+        const userCode = Array.from(codeBoxes).map(box => box.value).join("");
+        if(userCode === verificationCode){
+            window.location.href = "admin.html";
+        } else {
+            codeError.innerText = "Something went wrong!";
+        }
+    });
+});
+</script>
+<label>UserID</label>
+<input type="text" id="username" placeholder="Enter Your ID" required>
+
+<label>Password</label>
+<input type="password" id="password" placeholder="Enter password" required>
+<p style="text-align:left; margin-top:5px;">
+  <a href="reset_password.html" style="color:blue; text-decoration:underline;">Forgot Password?</a>
+</p>
+<div class="role">
+  <p>Login as</p>
+
+  <label class="radio">
+    <input type="radio" name="role" value="staff" checked>
+    Staff
+  </label>
+
+  <label class="radio">
+    <input type="radio" name="role" value="admin">
+    Admin
+  </label>
 </div>
 
-<div class="card">
-<h3>Total Revenue</h3>
-<p id="totalRevenue">0 SAR</p>
+<button type="submit">Sign In</button>
+<p class="signup-link">
+Don't have an account?
+<a href="#" onclick="showSignup()">Sign Up</a>
+</p>
+<p id="error"></p>
+
+</form>
+<form id="signupForm" style="display:none;">
+  <h3>Create Account</h3>
+
+  <label>Username</label>
+  <input type="text" id="newUsername" placeholder="Create a Username" required>
+
+  <label>Email</label>
+  <input type="text" id="newEmail" placeholder="Enter Your Email" required> <!-- مهم: type="text" ليطبق CSS -->
+
+  <label>Password</label>
+  <input type="password" id="newPassword" placeholder="Create a Password" required>
+  <small style="color:gray; font-size:12px; display:block; margin-top:4px;">
+    Password must be at least 8 characters, include a number, a symbol, and a capital letter.
+  </small>
+
+  <div class="role">
+      <p>Register as</p>
+      <label class="radio">
+          <input type="radio" name="newRole" value="staff" checked>
+          Staff
+      </label>
+      <label class="radio">
+          <input type="radio" name="newRole" value="admin">
+          Admin
+      </label>
+  </div>
+
+  <div class="privacy" style="margin-top:10px;">
+      <label>
+          <input type="checkbox" id="privacyCheck" required>
+          I agree to the 
+          <a href="privacy.html" class="privacy-link">Privacy Policy</a>
+      </label>
+  </div>
+
+  <button type="submit">Create Account</button>
+
+  <p class="signup-link">
+      Already have an account?
+      <a href="#" onclick="showLogin()">Login</a>
+  </p>
+
+  <p id="signupError" style="color:red; margin-top:5px;"></p>
+</form>
+
+
 </div>
+<script>
+   
+    
+//localStorage.setItem("currentUser", JSON.stringify(user));
+function showSignup(){
+document.getElementById("loginForm").style.display="none";
+document.getElementById("signupForm").style.display="block";
+}
 
-<div class="card">
-<h3>Available Seats</h3>
-<p id="availableSeats">0</p>
-</div>
+function showLogin(){
+document.getElementById("signupForm").style.display="none";
+document.getElementById("loginForm").style.display="block";
+}
 
-</div>
+</script>
 
-
-<div class="chart-container">
-<canvas id="seatsChart"></canvas>
-</div>
-
-<div class="chart-container">
-<canvas id="revenueChart"></canvas>
-</div>
-
-<div class="chart-container">
-<canvas id="passengerChart"></canvas>
-</div>
-
-
-<!-- جدول القطارات (مخفي فقط للبيانات) -->
-
-<table id="trainTable" style="display:none">
-
-<tr>
-<td>Train1</td>
-<td>Riyadh</td>
-<td>Dammam</td>
-<td>10:00</td>
-<td>200</td>
-<td>120</td>
-</tr>
-
-<tr>
-<td>Train2</td>
-<td>Riyadh</td>
-<td>Jeddah</td>
-<td>12:00</td>
-<td>250</td>
-<td>200</td>
-</tr>
-
-</table>
-
-
-<!-- جدول الحجوزات -->
-
-<table id="reservationTable" style="display:none">
-
-<tr>
-<td>Ali</td>
-<td>Train1</td>
-<td>50</td>
-<td>Confirmed</td>
-</tr>
-
-<tr>
-<td>Ahmed</td>
-<td>Train2</td>
-<td>70</td>
-<td>Confirmed</td>
-</tr>
-
-</table>
-
-
-<script src="dashboard.js"></script>
+<script src="users.js"></script>
+<script src="auth.js"></script>
 
 </body>
 </html>
