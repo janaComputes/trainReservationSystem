@@ -723,7 +723,15 @@
     <section id="reservations" class="content active">
         <div class="sectionHeader">
             <h2>Reservations</h2>
-            <button onclick="openModal('Reservation')">Add Reservation</button>
+
+
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button onclick="openModal('Reservation')">Add Reservation</button>
+
+                <button onclick="sortReservationsByDate()" id="sortBtn">
+                    Sort by Date ⬍
+                </button>
+            </div>
         </div>
         <div class="table-wrapper">
             <table>
@@ -812,7 +820,7 @@
                 </div>
                 <p style="color: gray; font-size: 14px; margin-top: 5px;">Detailed insights and booking history</p>
             </div>
-        
+
         </div>
 
         <div class="reports-stats">
@@ -1112,6 +1120,7 @@
                         const match = ticketType === "VIP" ? priceText.match(/VIP\s*(\d+)/) : priceText.match(/STD\s*(\d+)/);
                         price = match ? match[1] + " SR" : "0 SR";
                     }
+
                 });
 
                 if (!trainFound) return;
@@ -1126,7 +1135,7 @@
 
                 // 3. THE FIX: Force the Reports cards to recalculate NOW
                 updateReportAnalytics();
-
+                sortReservationsByDate();
                 finishSave();
                 return;
             }
@@ -1158,6 +1167,7 @@
             // 5. ADDING NEW PASSENGER
             if (currentTable === "Passenger") {
                 const phone = document.getElementById("inputPhone").value.trim();
+                setTimeout(loadAllData, 0);
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 const saudiPhoneRegex = /^\+9665\d{8}$/;
 
@@ -1185,10 +1195,15 @@
 
             // Add Action Buttons
             let actionCell = row.insertCell(-1);
+            let actionprof = row.insertCell(-1);
             actionCell.innerHTML = `
         <button onclick="editRow(this)" style="margin-right:5px">Edit</button>
         <button onclick="deleteRow(this)" style="background:#cc0000">Delete</button>
     `;
+            if (currentTable === "Passenger") {
+                actionprof.innerHTML = `
+     <button onclick="openPassengerProfile(this)"style="margin-right:5px">Profile</button>`;
+            }
             return row;
         }
 
@@ -1426,56 +1441,56 @@
 
 
         function filterReport(type) {
-    const rows = document.querySelectorAll("#historyTable tr");
-    const now = new Date();
-    let totalRev = 0;
-    let bookings = 0;
+            const rows = document.querySelectorAll("#historyTable tr");
+            const now = new Date();
+            let totalRev = 0;
+            let bookings = 0;
 
-    rows.forEach(row => {
-        // Must have 9 cells to be a valid report row
-        if (row.cells.length < 9) return;
+            rows.forEach(row => {
+                // Must have 9 cells to be a valid report row
+                if (row.cells.length < 9) return;
 
-        const dateText = row.cells[1].innerText; // Date is at index 1
-        const rowDate = new Date(dateText + "T00:00:00");
-        let includeByDate = false;
+                const dateText = row.cells[1].innerText; // Date is at index 1
+                const rowDate = new Date(dateText + "T00:00:00");
+                let includeByDate = false;
 
-        // 1. Check if the row falls within the selected time range
-        if (type === "daily") {
-            if (rowDate.toDateString() === now.toDateString()) includeByDate = true;
-        } else if (type === "weekly") {
-            const diff = (now - rowDate) / (1000 * 60 * 60 * 24);
-            if (diff <= 7) includeByDate = true;
-        } else if (type === "monthly") {
-            if (rowDate.getMonth() === now.getMonth() && rowDate.getFullYear() === now.getFullYear()) {
-                includeByDate = true;
-            }
-        }
-
-        // 2. Show or Hide the row based on the date
-        if (includeByDate) {
-            row.style.display = ""; 
-
-            // 3. Update the analytics for the filtered view
-            // Check status at index 8 and price at index 7
-            if (row.cells[8].innerText.includes("Confirmed")) {
-                const priceText = row.cells[7].innerText.replace(/[^\d.-]/g, '');
-                const priceNum = parseFloat(priceText);
-                if (!isNaN(priceNum)) {
-                    totalRev += priceNum;
-                    bookings++;
+                // 1. Check if the row falls within the selected time range
+                if (type === "daily") {
+                    if (rowDate.toDateString() === now.toDateString()) includeByDate = true;
+                } else if (type === "weekly") {
+                    const diff = (now - rowDate) / (1000 * 60 * 60 * 24);
+                    if (diff <= 7) includeByDate = true;
+                } else if (type === "monthly") {
+                    if (rowDate.getMonth() === now.getMonth() && rowDate.getFullYear() === now.getFullYear()) {
+                        includeByDate = true;
+                    }
                 }
-            }
-        } else {
-            row.style.display = "none";
-        }
-    });
 
-    // 4. Update the cards with the filtered totals
-    document.getElementById("totalRevenue").innerText = totalRev.toFixed(2) + " SR";
-    document.getElementById("totalBookings").innerText = bookings;
-    const avg = bookings > 0 ? (totalRev / bookings).toFixed(2) : 0;
-    document.getElementById("avgPrice").innerText = avg + " SR";
-}
+                // 2. Show or Hide the row based on the date
+                if (includeByDate) {
+                    row.style.display = "";
+
+                    // 3. Update the analytics for the filtered view
+                    // Check status at index 8 and price at index 7
+                    if (row.cells[8].innerText.includes("Confirmed")) {
+                        const priceText = row.cells[7].innerText.replace(/[^\d.-]/g, '');
+                        const priceNum = parseFloat(priceText);
+                        if (!isNaN(priceNum)) {
+                            totalRev += priceNum;
+                            bookings++;
+                        }
+                    }
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // 4. Update the cards with the filtered totals
+            document.getElementById("totalRevenue").innerText = totalRev.toFixed(2) + " SR";
+            document.getElementById("totalBookings").innerText = bookings;
+            const avg = bookings > 0 ? (totalRev / bookings).toFixed(2) : 0;
+            document.getElementById("avgPrice").innerText = avg + " SR";
+        }
 
         document.getElementById("logoutBtn").onclick = () => { localStorage.removeItem("role"); window.location.href = "login.html"; };
         //dashboard
@@ -1942,8 +1957,8 @@
         <hr>
     `;
             });
-            // let totalSeats = userReservations.reduce((sum, r) => sum + (r.seatsNeeded || 1), 0);
-            // html += `<p><b>Total Tickets Booked:</b> ${totalSeats}</p>`;
+            let totalSeats = userReservations.reduce((sum, r) => sum + (r.seatsNeeded || 1), 0);
+            html += `<p><b>Total Tickets Booked:</b> ${totalSeats}</p>`;
             document.getElementById("profileContent").innerHTML = html;
             document.getElementById("profileModal").style.display = "flex";
         }
@@ -1969,8 +1984,8 @@
             if (dataRows.length === 0) return;
 
             dataRows.sort((a, b) => {
-                const aDate = new Date(a.cells[4].innerText);
-                const bDate = new Date(b.cells[4].innerText);
+                const aDate = new Date(a.cells[5].innerText);
+                const bDate = new Date(b.cells[5].innerText);
 
                 return dateSortAsc ? aDate - bDate : bDate - aDate;
             });
