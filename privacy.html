@@ -34,17 +34,22 @@ p {
 button {
     display: block;
     margin: 20px auto 0;
-    padding: 10px 20px;
-    background-color: #1976d2;
+    padding: 11px 22px;
+    background: linear-gradient(135deg, #1f4f85, #2f6cac);
     color: white;
-    border: none;
-    border-radius: 6px;
+    border: 1px solid #285d97;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 8px 16px rgba(31, 79, 133, 0.2);
+    transition: background 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
 }
 
 button:hover {
-    background-color: #0d47a1;
+    background: linear-gradient(135deg, #215b98, #3a77b5);
+    box-shadow: 0 10px 20px rgba(31, 79, 133, 0.25);
+    transform: translateY(-1px);
 }
 </style>
 

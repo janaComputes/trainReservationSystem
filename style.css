@@ -64,6 +64,74 @@ input[type="email"] {
     background: #f1f1f1;
 }
 
+input[type="date"] {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border: 1px solid #cfd8e3;
+    border-radius: 12px;
+    background-color: #f8fbff;
+    color: #0f172a;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+input[type="date"]:hover {
+    border-color: #b8c6d8;
+    background-color: #f1f6fc;
+}
+
+input[type="date"]:focus {
+    outline: none;
+    border-color: #5b7ba5;
+    box-shadow: 0 0 0 3px rgba(91, 123, 165, 0.18);
+    background-color: #ffffff;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.65;
+    cursor: pointer;
+    filter: saturate(0.7) brightness(0.8);
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+    opacity: 0.9;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border: 1px solid #cfd8e3;
+    border-radius: 12px;
+    background-color: #f8fbff;
+    color: #0f172a;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, #64748b 50%),
+        linear-gradient(135deg, #64748b 50%, transparent 50%);
+    background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 36px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+select option {
+    color: #0f172a;
+    background: #ffffff;
+}
+
+select:hover {
+    border-color: #b8c6d8;
+    background-color: #f1f6fc;
+}
+
+select:focus {
+    outline: none;
+    border-color: #5b7ba5;
+    box-shadow: 0 0 0 3px rgba(91, 123, 165, 0.18);
+    background-color: #ffffff;
+}
+
 .role {
     text-align: left;
     margin-top: 15px;
@@ -78,18 +146,27 @@ input[type="email"] {
 button {
     width: 100%;
     margin-top: 20px;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: #02021c;
+    padding: 12px 14px;
+    border: 1px solid #1f3460;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #112448, #1a3767);
     color: white;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
+    box-shadow: 0 8px 18px rgba(17, 36, 72, 0.18);
+    transition: background 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
 }
 
 button:hover {
-    background: #11114d;
+    background: linear-gradient(135deg, #183563, #224983);
+    box-shadow: 0 10px 22px rgba(17, 36, 72, 0.24);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(17, 36, 72, 0.2);
 }
 
 #error, #signupError {

@@ -4,6 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>staff dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+        }
+
+        button {
+            padding: 9px 16px;
+            background: linear-gradient(135deg, #132a50, #1e3f74);
+            color: white;
+            border: 1px solid #1e3f74;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(30, 63, 116, 0.2);
+            transition: background 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #183663, #245188);
+            box-shadow: 0 10px 20px rgba(30, 63, 116, 0.26);
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
 <body>
     <button onclick="logout()">logout</button>

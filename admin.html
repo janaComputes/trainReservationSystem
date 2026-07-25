@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Train Reservation System - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script>
         (function () {
             const userRole = localStorage.getItem("role");
@@ -29,15 +30,18 @@
             width: 100%;
             display: flex;
             justify-content: center;
-            margin-top: 15px;
+            margin: 16px 0 24px;
+            overflow: hidden;
+            border-radius: 24px;
         }
 
         .train-img {
             width: 100%;
-            max-width: 1300px;
-            height: 450px;
-            object-fit: cover;
-            border-radius: 12px;
+            height: auto;
+            object-fit: contain;
+            object-position: center;
+            display: block;
+            filter: saturate(1.04) contrast(1.04) brightness(0.99);
         }
 
         .dashboard-grid {
@@ -56,7 +60,8 @@
 
         .card {
 
-            background: white;
+            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+            border: 1px solid #dbeafe;
 
             border-radius: 12px;
 
@@ -89,7 +94,11 @@
 
             width: 100% !important;
 
-            height: 120px !important;
+            height: 240px !important;
+
+            display: block;
+
+            max-width: 100%;
 
         }
 
@@ -163,15 +172,21 @@
 
         .tab {
             padding: 10px 20px;
-            border: none;
-            background: #ddd;
-            border-radius: 20px;
+            border: 1px solid #d0d7e2;
+            background: #e9edf3;
+            color: #334155;
+            border-radius: 999px;
             cursor: pointer;
+            font-weight: 600;
+            box-shadow: inset 0 0 0 1px #dbe3ef;
+            transition: all 0.2s ease;
         }
 
         .tab.active {
             background: #0b1c3f;
             color: white;
+            border-color: #0b1c3f;
+            box-shadow: 0 8px 18px rgba(11, 28, 63, 0.25);
         }
 
         .content {
@@ -196,12 +211,48 @@
         }
 
         button {
-            background: #0b1c3f;
+            background: linear-gradient(135deg, #132a50, #1e3f74);
             color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            border: 1px solid #1e3f74;
+            padding: 9px 16px;
+            border-radius: 10px;
             cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 8px 16px rgba(30, 63, 116, 0.2);
+            transition: background 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #183663, #245188);
+            box-shadow: 0 10px 20px rgba(30, 63, 116, 0.26);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 12px rgba(30, 63, 116, 0.2);
+        }
+
+        .danger-btn {
+            background: linear-gradient(135deg, #7f1d2d, #9f2335);
+            border-color: #7f1d2d;
+            box-shadow: 0 8px 16px rgba(127, 29, 45, 0.2);
+        }
+
+        .danger-btn:hover {
+            background: linear-gradient(135deg, #8f2435, #b12b3f);
+            box-shadow: 0 10px 20px rgba(127, 29, 45, 0.25);
+        }
+
+        .neutral-btn {
+            background: linear-gradient(135deg, #6b7280, #808999);
+            border-color: #6b7280;
+            box-shadow: 0 8px 16px rgba(71, 85, 105, 0.18);
+        }
+
+        .neutral-btn:hover {
+            background: linear-gradient(135deg, #707887, #8c95a4);
+            box-shadow: 0 10px 20px rgba(71, 85, 105, 0.24);
         }
 
         table {
@@ -224,28 +275,167 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.42);
+            backdrop-filter: blur(4px);
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
 
         .modal-box {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border: 1px solid #d7e2ee;
+            padding: 28px;
+            border-radius: 22px;
             width: 350px;
             text-align: center;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
         }
 
         .modal-box input,
         .modal-box select {
             width: 95%;
-            margin: 8px 0;
-            border-radius: 30px;
-            padding: 12px;
-            border: 1px solid #ccc;
+            margin: 7px 0;
+            border-radius: 14px;
+            padding: 11px 13px;
+            border: 1px solid #cfd8e3;
+            background: #f8fbff;
+            color: #0f172a;
             box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .modal-box input[type="date"] {
+            width: 95%;
+        }
+
+        .modal-box input:hover,
+        .modal-box select:hover {
+            border-color: #b8c6d8;
+            background: #f1f6fc;
+        }
+
+        .modal-box input:focus,
+        .modal-box select:focus {
+            outline: none;
+            border-color: #5b7ba5;
+            box-shadow: 0 0 0 3px rgba(91, 123, 165, 0.18);
+            background: #ffffff;
+        }
+
+        .modal-box select,
+        .modal-surface select {
+            appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, #64748b 50%),
+                linear-gradient(135deg, #64748b 50%, transparent 50%),
+                linear-gradient(180deg, #f8fbff, #f3f7fc);
+            background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px), 0 0;
+            background-size: 6px 6px, 6px 6px, 100% 100%;
+            background-repeat: no-repeat;
+            padding-right: 36px;
+        }
+
+        .modal-box select option,
+        .modal-surface select option {
+            color: #0f172a;
+            background: #ffffff;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.42);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-surface {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border: 1px solid #d7e2ee;
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+        }
+
+        .modal-surface input,
+        .modal-surface select {
+            width: 100%;
+            margin: 6px 0;
+            border-radius: 14px;
+            padding: 11px 13px;
+            border: 1px solid #cfd8e3;
+            background: #f8fbff;
+            color: #0f172a;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .modal-surface input[type="date"] {
+            width: 100%;
+        }
+
+        .modal-surface input:hover,
+        .modal-surface select:hover {
+            border-color: #b8c6d8;
+            background: #f1f6fc;
+        }
+
+        .modal-surface input:focus,
+        .modal-surface select:focus {
+            outline: none;
+            border-color: #5b7ba5;
+            box-shadow: 0 0 0 3px rgba(91, 123, 165, 0.18);
+            background: #ffffff;
+        }
+
+        .modal-compact {
+            width: 320px;
+            text-align: center;
+        }
+
+        input[type="date"] {
+            appearance: none;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 0.65;
+            cursor: pointer;
+            filter: saturate(0.7) brightness(0.8);
+        }
+
+        input[type="date"]:hover::-webkit-calendar-picker-indicator {
+            opacity: 0.9;
+        }
+
+        #profileContent {
+            overflow-y: auto;
+            max-height: 300px;
+            margin: 10px 0;
+            padding-right: 4px;
+            text-align: left;
+            color: #334155;
+        }
+
+        #bookingConfirmModal {
+            display: none;
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
+            width: min(92vw, 380px);
+            text-align: left;
+        }
+
+        #bookingDetails {
+            color: #334155;
+            line-height: 1.5;
+            margin-top: 8px;
         }
 
         #reservationTable tr:first-child:not(:last-child) {
@@ -317,6 +507,73 @@
             margin-bottom: 30px;
         }
 
+        .report-stat-card {
+            padding: 20px;
+            border-radius: 18px;
+            border: 1px solid #dbe5f0;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .report-stat-card p:first-child {
+            color: #64748b;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .report-stat-card h2 {
+            margin: 10px 0;
+            color: #0f172a;
+        }
+
+        .report-stat-card p:last-child {
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .report-stat-card.revenue p:last-child {
+            color: #0f766e;
+        }
+
+        .report-stat-card.bookings p:last-child {
+            color: #2563eb;
+        }
+
+        .report-stat-card.avg p:last-child {
+            color: #8a6a16;
+        }
+
+        .report-header-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .report-filter-btn {
+            width: auto;
+            margin-top: 0;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: #eef3f8;
+            color: #334155;
+            border: 1px solid #d6e0ea;
+            box-shadow: inset 0 0 0 1px #edf2f7;
+        }
+
+        .report-filter-btn:hover {
+            background: #e6edf5;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+        }
+
+        .report-filter-btn.active {
+            background: linear-gradient(135deg, #132a50, #1e3f74);
+            color: #ffffff;
+            border-color: #1e3f74;
+            box-shadow: 0 8px 16px rgba(30, 63, 116, 0.2);
+        }
+
         /* Tablet */
         @media (max-width: 1024px) {
             .dashboard-grid {
@@ -378,12 +635,26 @@
             }
 
             .train-img {
+                width: 100%;
                 height: auto;
-                max-height: 220px;
             }
 
             .card {
                 padding: 12px;
+            }
+
+            .track-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .track-main {
+                width: 100%;
+            }
+
+            .card canvas {
+                height: 200px !important;
             }
 
             .quick-card {
@@ -400,9 +671,9 @@
             }
 
             .modal-box {
-                background: white;
+                background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
                 padding: 25px;
-                border-radius: 20px;
+                border-radius: 22px;
                 width: 90%;
                 /* Responsive width */
                 max-width: 400px;
@@ -413,7 +684,7 @@
                 /* Enables vertical scrolling if needed */
                 text-align: center;
                 position: relative;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
             }
 
             /* Optional: Make the inputs look a bit tighter to save space */
@@ -423,8 +694,7 @@
                 margin: 6px 0;
                 padding: 10px;
                 box-sizing: border-box;
-                border-radius: 8px;
-                /* Slightly less rounded looks more professional for forms */
+                border-radius: 12px;
             }
 
             th,
@@ -502,29 +772,31 @@
 
         .stat-card {
             border-radius: 14px;
-            color: #1e293b;
-            font-weight: 500;
-            transition: 0.3s;
+            color: #ffffff;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            border: none;
         }
 
-        /* 🚆 Trains - Soft Blue */
+        /* 🚆 Trains - Deep Blue */
         .trains-card {
-            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            background: linear-gradient(135deg, #0f4c81, #1d70b8);
         }
 
-        /* 📅 Bookings - Soft Green */
+        /* 📅 Bookings - Bright Blue */
         .bookings-card {
-            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            background: linear-gradient(135deg, #155e75, #0284c7);
         }
 
-        /* 💰 Revenue - Soft Peach */
+        /* 💰 Revenue - Azure Blue */
         .revenue-card {
-            background: linear-gradient(135deg, #ffedd5, #fed7aa);
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
         }
 
-        /* 📊 Occupancy - Soft Purple */
+        /* 📊 Occupancy - Sky Blue */
         .occupancy-card {
-            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            background: linear-gradient(135deg, #0369a1, #38bdf8);
         }
 
         .stat-card:hover {
@@ -539,7 +811,61 @@
 
         .stat-card h4 {
             font-size: 14px;
-            opacity: 0.7;
+            opacity: 0.88;
+        }
+
+        .vip {
+            background: linear-gradient(135deg, rgba(214, 178, 92, 0.18), rgba(245, 231, 186, 0.42));
+            color: #8a6a16;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(198, 160, 74, 0.22);
+            box-shadow: 0 0 0 1px rgba(212, 176, 80, 0.06), 0 0 14px rgba(212, 176, 80, 0.12);
+        }
+
+        .action-btn {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+            transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .action-btn i {
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+        }
+
+        .action-edit {
+            background: linear-gradient(135deg, #eef4fb, #e2ebf7);
+            color: #334155;
+            border-color: #d5dfeb;
+        }
+
+        .action-edit:hover {
+            background: linear-gradient(135deg, #e6eef8, #d9e4f1);
+        }
+
+        .action-delete {
+            background: linear-gradient(135deg, #7f1d2d, #952636);
+            color: #fff;
+            border-color: #7f1d2d;
+        }
+
+        .action-delete:hover {
+            background: linear-gradient(135deg, #8c2333, #ac3041);
         }
 
         /* Container for the cards */
@@ -562,13 +888,13 @@
         }
 
         .quick-item:nth-child(1) {
-            background: #e0f2fe;
-            border-left: 5px solid #3b82f6;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid #2563eb;
         }
 
         .quick-item:nth-child(2) {
-            background: #dcfce7;
-            border-left: 5px solid #22c55e;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 5px solid #1d4ed8;
         }
 
         /* Badge container - Aligns badge to the top right */
@@ -596,13 +922,84 @@
             margin: 0;
             font-size: 1rem;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #0f172a;
         }
 
         .quick-item p {
             margin: 0;
             font-size: 0.85rem;
-            color: #4b5563;
+            color: #334155;
+        }
+
+        .track-row {
+            background: #f8fbff;
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(37, 99, 235, 0.08);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        }
+
+        .track-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .track-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1d4ed8;
+            flex: 0 0 auto;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .track-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .track-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .track-route {
+            color: #64748b;
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .track-status {
+            color: white;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            flex: 0 0 auto;
+        }
+
+        .track-status.available {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+        }
+
+        .track-status.unavailable {
+            background: linear-gradient(135deg, #7c2d12, #dc2626);
         }
 
         /* Hover Effect */
@@ -613,11 +1010,11 @@
         }
 
         #reservations .vip {
-            background: #fff7d6;
-            color: #c79b00;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 6px;
+            /* inherits shared .vip styling */
+        }
+
+        #historyTable .vip {
+            /* inherits shared .vip styling */
         }
     </style>
 </head>
@@ -651,7 +1048,7 @@
             <h2>Dashboard</h2>
         </div>
         <div class="train">
-            <img src="images/train image.png" alt="Train Station" class="train-img">
+            <img src="images/Train.jpeg" alt="Train Station" class="train-img">
         </div>
 
         <div class="dashboard-grid">
@@ -812,10 +1209,10 @@
         <div class="sectionHeader">
             <div>
                 <h2 style="margin:0;">Reports & Analytics</h2>
-                <div style="margin-top:10px; display:flex; gap:10px;">
-                    <button id="dailyBtn">Daily</button>
-                    <button id="weeklyBtn">Weekly</button>
-                    <button id="monthlyBtn">Monthly</button>
+                <div class="report-header-controls">
+                    <button id="dailyBtn" class="report-filter-btn">Daily</button>
+                    <button id="weeklyBtn" class="report-filter-btn">Weekly</button>
+                    <button id="monthlyBtn" class="report-filter-btn">Monthly</button>
 
                 </div>
                 <p style="color: gray; font-size: 14px; margin-top: 5px;">Detailed insights and booking history</p>
@@ -824,22 +1221,19 @@
         </div>
 
         <div class="reports-stats">
-            <div class="stat-card"
-                style="background:white; padding:20px; border-radius:15px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <div class="report-stat-card revenue">
                 <p style="color:gray; margin:0; font-size: 14px;">Total Revenue</p>
-                <h2 id="totalRevenue" style="margin: 10px 0; color: #0b1c3f;">0 SR</h2>
+                <h2 id="totalRevenue">0 SR</h2>
                 <p style="color:#28a745; font-size:12px; margin:0;">+0% from previous period</p>
             </div>
-            <div class="stat-card"
-                style="background:white; padding:20px; border-radius:15px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <div class="report-stat-card bookings">
                 <p style="color:gray; margin:0; font-size: 14px;">Total Bookings</p>
-                <h2 id="totalBookings" style="margin: 10px 0; color: #0b1c3f;">0</h2>
+                <h2 id="totalBookings">0</h2>
                 <p style="color:#007bff; font-size:12px; margin:0;">+0% from previous period</p>
             </div>
-            <div class="stat-card"
-                style="background:white; padding:20px; border-radius:15px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <div class="report-stat-card avg">
                 <p style="color:gray; margin:0; font-size: 14px;">Avg. Ticket Price</p>
-                <h2 id="avgPrice" style="margin: 10px 0; color: #0b1c3f;">0 SR</h2>
+                <h2 id="avgPrice">0 SR</h2>
                 <p style="color:#6f42c1; font-size:12px; margin:0;">+0% from previous period</p>
             </div>
         </div>
@@ -885,7 +1279,7 @@
                 style="display:none;">
             <input type="date" id="input3" style="display:none;">
             <button id="saveBtn" style="width: 100%; margin-top: 10px;">Save</button>
-            <button onclick="closeModal()" style="background:gray; width: 100%; margin-top: 5px;">Cancel</button>
+            <button onclick="closeModal()" class="neutral-btn" style="width: 100%; margin-top: 5px;">Cancel</button>
         </div>
     </div>
     <!--  <script src="storage.js"></script>  -->
@@ -925,6 +1319,10 @@
                 if (typeof updateAllCharts === "function") {
                     updateAllCharts();
                 } updateQuickCards();
+
+                if (typeof updateButtonStyles === "function") {
+                    updateButtonStyles(document.getElementById("dailyBtn"));
+                }
             }, 500);
 
         };
@@ -1197,8 +1595,8 @@
             let actionCell = row.insertCell(-1);
             let actionprof = row.insertCell(-1);
             actionCell.innerHTML = `
-        <button onclick="editRow(this)" style="margin-right:5px">Edit</button>
-        <button onclick="deleteRow(this)" style="background:#cc0000">Delete</button>
+        <button onclick="editRow(this)" class="action-btn action-edit" aria-label="Edit"><i class="fa-solid fa-pen"></i></button>
+        <button onclick="deleteRow(this)" class="action-btn action-delete" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>
     `;
             if (currentTable === "Passenger") {
                 actionprof.innerHTML = `
@@ -1512,6 +1910,14 @@
     <script>
         let activeChart = null;
         let passengerChart = null;
+        function createVerticalGradient(canvas, startColor, endColor) {
+            const context = canvas.getContext("2d");
+            const gradient = context.createLinearGradient(0, 0, 0, canvas.height || 240);
+            gradient.addColorStop(0, startColor);
+            gradient.addColorStop(1, endColor);
+            return gradient;
+        }
+
         // window.addEventListener("load", function () {
 
         /* Active Trains */
@@ -1552,19 +1958,81 @@
                     datasets: [{
                         label: "Reservations",
                         data: data,
-                        borderColor: "#0b3c5d",
-                        backgroundColor: "rgba(11,60,93,0.2)", // 🔥 soft fill
+                            borderColor: "#2563eb",
+                            backgroundColor: createVerticalGradient(canvas, "rgba(147,197,253,0.42)", "rgba(147,197,253,0.03)"),
+                        pointBackgroundColor: "#ffffff",
+                            pointBorderColor: "#2563eb",
+                        pointBorderWidth: 2,
+                            pointHoverBackgroundColor: "#2563eb",
+                        pointHoverBorderColor: "#ffffff",
+                            pointRadius: 3,
+                        pointHoverRadius: 7,
                         fill: true,
-                        tension: 0.4 // smooth curve
+                            tension: 0.42,
+                        borderWidth: 3
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 8,
+                            right: 8,
+                            bottom: 0,
+                            left: 0
+                        }
+                    },
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: "rgba(15, 23, 42, 0.95)",
+                            titleColor: "#ffffff",
+                            bodyColor: "#e2e8f0",
+                            padding: 12,
+                            cornerRadius: 10,
+                            displayColors: false,
+                            caretPadding: 10,
+                            titleFont: {
+                                weight: "600"
+                            },
+                            bodyFont: {
+                                weight: "500"
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: "index",
+                        intersect: false
                     },
                     animation: {
                         duration: 1000
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: "#6b7280",
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: "#6b7280",
+                                precision: 0,
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: "rgba(148, 163, 184, 0.18)",
+                                drawBorder: false
+                            }
+                        }
                     }
                 }
             });
@@ -1618,28 +2086,76 @@
                     datasets: [{
                         label: "Passengers",
                         data: data,
-                        backgroundColor: "#0b3c5d",
-                        borderRadius: 8, // 🔥 rounded bars
-                        barThickness: 25
+                        backgroundColor: function (context) {
+                            const chart = context.chart;
+                            const { ctx, chartArea } = chart;
+
+                            if (!chartArea) return "#93c5fd";
+
+                            const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                            gradient.addColorStop(0, "#dbeafe");
+                            gradient.addColorStop(0.55, "#93c5fd");
+                            gradient.addColorStop(1, "#2563eb");
+                            return gradient;
+                        },
+                        borderColor: "#2563eb",
+                        borderWidth: 1,
+                        borderRadius: 12,
+                        barThickness: 26,
+                        borderSkipped: false
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 8,
+                            right: 8,
+                            bottom: 0,
+                            left: 0
+                        }
+                    },
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: "rgba(15, 23, 42, 0.95)",
+                            titleColor: "#ffffff",
+                            bodyColor: "#e2e8f0",
+                            padding: 12,
+                            cornerRadius: 10,
+                            displayColors: false,
+                            caretPadding: 10
+                        }
+                    },
+                    interaction: {
+                        mode: "index",
+                        intersect: false
                     },
                     animation: {
-                        duration: 1000 // smooth load
+                        duration: 1000
                     },
                     scales: {
                         x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
                             ticks: {
-                                color: "#333"
+                                color: "#6b7280",
+                                font: {
+                                    size: 12
+                                }
                             }
                         },
                         y: {
                             beginAtZero: true,
+                            grid: {
+                                color: "rgba(148, 163, 184, 0.18)",
+                                drawBorder: false
+                            },
                             ticks: {
+                                color: "#6b7280",
                                 stepSize: 1
                             }
                         }
@@ -1668,29 +2184,19 @@
                     let route = row.cells[2].innerText;
                     let status = row.cells[5].innerText;
 
-                    let color = status === "Available" ? "#28a745" : "#dc3545";
+                    let statusClass = status === "Available" ? "available" : "unavailable";
 
                     html += `
-                <div style="
-                    background:#f4f6f8;
-                    padding:12px;
-                    border-radius:10px;
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                ">
-                    <div>
-                        <strong style="font-size:16px;">🚆 ${name}</strong>
-                        <span style="color:gray;">${route}</span>
+                <div class="track-row">
+                    <div class="track-main">
+                        <span class="track-icon" aria-hidden="true"><i class="fa-solid fa-train-subway"></i></span>
+                        <div class="track-text">
+                            <strong class="track-name">${name}</strong>
+                            <span class="track-route">${route}</span>
+                        </div>
                     </div>
 
-                    <span style="
-                        background:${color};
-                        color:white;
-                        padding:5px 10px;
-                        border-radius:20px;
-                        font-size:12px;
-                    ">
+                    <span class="track-status ${statusClass}">
                         ${status}
                     </span>
                 </div>
@@ -1874,8 +2380,7 @@
             buttons.forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) {
-                    btn.style.background = (id === activeBtn.id) ? "#0b1c3f" : "#ddd";
-                    btn.style.color = (id === activeBtn.id) ? "white" : "black";
+                    btn.classList.toggle("active", id === activeBtn.id);
                 }
             });
         }
@@ -1948,7 +2453,7 @@
 
             userReservations.forEach(r => {
                 let type = r.ticketType === "VIP"
-                    ? "<span style='background:#fff7d6;color:#c79b00;padding:3px 8px;border-radius:6px;font-weight:bold;'>VIP</span>"
+                    ? "<span class='vip'>VIP</span>"
                     : "Standard";
 
                 html += `
@@ -2006,10 +2511,9 @@
 
     </script>
 
-    <div id="changePasswordModal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div id="changePasswordModal" class="modal-overlay">
 
-        <div style="background:white; padding:25px; border-radius:12px; width:320px; text-align:center;">
+        <div class="modal-surface modal-compact">
 
             <h3>Change Password</h3>
 
@@ -2026,8 +2530,7 @@
     </div>
     <script src="storage.js"></script>
     <script src="dashboard.js"></script>
-    <div id="bookingConfirmModal" style="display:none; position:fixed; top:40%; left:50%; transform:translate(-50%,-50%);
-background:white; padding:20px; border:1px solid gray; border-radius:10px; z-index:999;">
+    <div id="bookingConfirmModal" class="modal-surface">
 
         <h3>Confirm Booking</h3>
 
@@ -2041,10 +2544,9 @@ background:white; padding:20px; border:1px solid gray; border-radius:10px; z-ind
     </div>
 
 
-    <div id="changePasswordModal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div id="changePasswordModal" class="modal-overlay">
 
-        <div style="background:white; padding:25px; border-radius:12px; width:320px; text-align:center;">
+        <div class="modal-surface modal-compact">
 
             <h3>Change Password</h3>
 
@@ -2059,11 +2561,10 @@ background:white; padding:20px; border:1px solid gray; border-radius:10px; z-ind
 
         </div>
     </div>
-    <div id="profileModal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
-        <div style="background:white; padding:20px; border-radius:10px; width:300px;">
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-surface" style="width:300px;">
             <h3>Passenger Profile</h3>
-            <div id="profileContent" style="overflow-y:auto; max-height:300px; margin:10px 0;"></div>
+            <div id="profileContent"></div>
             <button onclick="closeProfile()">Close</button>
         </div>
     </div>
