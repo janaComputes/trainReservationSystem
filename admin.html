@@ -438,9 +438,6 @@
             margin-top: 8px;
         }
 
-        #reservationTable tr:first-child:not(:last-child) {
-            display: none;
-        }
 
         /* Tablet */
         @media (max-width: 1024px) {
@@ -1124,10 +1121,7 @@
 
             <div style="display:flex; gap:10px; align-items:center;">
                 <button onclick="openModal('Reservation')">Add Reservation</button>
-
-                <button onclick="sortReservationsByDate()" id="sortBtn">
-                    Sort by Date ⬍
-                </button>
+                <button onclick="toggleSortReservations()" id="sortBtn" style="min-width:160px;">Sort by Date ⬆</button>
             </div>
         </div>
         <div class="table-wrapper">
@@ -1146,7 +1140,7 @@
                 </thead>
                 <tbody id="reservationTable">
                     <tr>
-                        <td colspan="6" style="text-align:center;">No reservations yet</td>
+                        <td colspan="8" style="text-align:center;">No reservations yet</td>
                     </tr>
                 </tbody>
             </table>
@@ -1533,7 +1527,6 @@
 
                 // 3. THE FIX: Force the Reports cards to recalculate NOW
                 updateReportAnalytics();
-                sortReservationsByDate();
                 finishSave();
                 return;
             }
@@ -1582,7 +1575,10 @@
 
         function insertNewRow(dataArray) {
             const tableBody = document.getElementById(currentTable.toLowerCase() + "Table");
-            if (tableBody.innerHTML.includes("No ")) tableBody.innerHTML = "";
+            const placeholderRow = Array.from(tableBody.rows).find(r => r.cells.length === 1 && r.cells[0].hasAttribute("colspan"));
+            if (placeholderRow) {
+                tableBody.innerHTML = "";
+            }
 
             let row = tableBody.insertRow();
             dataArray.forEach((text, index) => {
@@ -1591,17 +1587,16 @@
                 if (text === "Confirmed") cell.style.color = "green";
             });
 
-            // Add Action Buttons
             let actionCell = row.insertCell(-1);
-            let actionprof = row.insertCell(-1);
-            actionCell.innerHTML = `
+            let actionHtml = `
         <button onclick="editRow(this)" class="action-btn action-edit" aria-label="Edit"><i class="fa-solid fa-pen"></i></button>
-        <button onclick="deleteRow(this)" class="action-btn action-delete" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>
-    `;
+        <button onclick="deleteRow(this)" class="action-btn action-delete" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>`;
+
             if (currentTable === "Passenger") {
-                actionprof.innerHTML = `
-     <button onclick="openPassengerProfile(this)"style="margin-right:5px">Profile</button>`;
+                actionHtml += ` <button onclick="openPassengerProfile(this)" class="action-btn neutral-btn" style="margin-left:5px">Profile</button>`;
             }
+
+            actionCell.innerHTML = actionHtml;
             return row;
         }
 
@@ -1648,7 +1643,7 @@
             // Logic specifically for the Reservations Table
             if (row.parentElement.id === "reservationTable") {
                 // If it's already canceled, don't do anything
-                if (row.cells[4].innerText === "Canceled") return;
+                if (row.cells[6].innerText === "Canceled") return;
 
                 if (confirm("Are you sure you want to cancel this reservation?")) {
                     const resID = row.cells[0].innerText;
@@ -1667,30 +1662,25 @@
                                 tr.dataset.standardAvailable = parseInt(tr.dataset.standardAvailable || 0) + 1;
                             }
 
-
                             tr.cells[5].innerText = "Available"; // Ensure status is set to Available
                             tr.cells[5].style.color = "green";
                         }
                     });
 
-
-
                     // 2. UPDATE RESERVATIONS TABLE: Change status to Canceled
-                    row.cells[4].innerHTML = "<span style='color:red'>Canceled</span>";
+                    row.cells[6].innerHTML = "<span style='color:red'>Canceled</span>";
                     btn.style.display = "none"; // Hide the button so it can't be clicked again
 
                     // 3. SYNC HISTORY: Find the matching ID in the Reports table and update it
                     document.querySelectorAll("#historyTable tr").forEach(hr => {
                         if (hr.cells[0].innerText === resID) {
-                            hr.cells[7].innerHTML = "<span style='color:red'>Canceled</span>";
+                            hr.cells[8].innerHTML = "<span style='color:red'>Canceled</span>";
                         }
                     });
                 } else {
                     return; // User clicked 'Cancel' on the confirm box
                 }
-            }
-            // Logic for Trains or Passengers (Permanent Delete)
-            else {
+            } else {
                 if (confirm("Are you sure you want to delete this entry permanently?")) {
                     row.remove();
                 } else {
@@ -2472,41 +2462,32 @@
             document.getElementById("profileModal").style.display = "none";
         }
 
-        let dateSortAsc = true;
+        let reservationDateSortAsc = true;
 
-        function sortReservationsByDate() {
+        function toggleSortReservations() {
             const table = document.getElementById("reservationTable");
-
-            // خذ كل الصفوف
-            let rows = Array.from(table.querySelectorAll("tr"));
-
-            // فصل الصف الوهمي (No reservations)
-            let placeholder = rows.find(r => r.cells.length === 1 || r.cells[0]?.colSpan);
-
-            // صفوف حقيقية فقط
-            let dataRows = rows.filter(r => r !== placeholder);
+            const rows = Array.from(table.querySelectorAll("tr"));
+            const placeholder = rows.find(r => r.cells.length === 1 && r.cells[0].hasAttribute("colspan"));
+            const dataRows = rows.filter(r => r !== placeholder);
 
             if (dataRows.length === 0) return;
 
             dataRows.sort((a, b) => {
                 const aDate = new Date(a.cells[5].innerText);
                 const bDate = new Date(b.cells[5].innerText);
-
-                return dateSortAsc ? aDate - bDate : bDate - aDate;
+                return reservationDateSortAsc ? aDate - bDate : bDate - aDate;
             });
 
-            // امسح الجدول
             table.innerHTML = "";
-
-            // رجع البيانات
             dataRows.forEach(r => table.appendChild(r));
+            if (placeholder) table.appendChild(placeholder);
 
-            // رجع الصف الوهمي في النهاية (إذا موجود)
-            if (placeholder) {
-                table.appendChild(placeholder);
+            const sortBtn = document.getElementById("sortBtn");
+            if (sortBtn) {
+                sortBtn.innerText = reservationDateSortAsc ? "Sort by Date ⬇" : "Sort by Date ⬆";
             }
 
-            dateSortAsc = !dateSortAsc;
+            reservationDateSortAsc = !reservationDateSortAsc;
         }
 
     </script>
