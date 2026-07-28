@@ -414,9 +414,9 @@
 
         #profileContent {
             overflow-y: auto;
-            max-height: 300px;
-            margin: 10px 0;
-            padding-right: 4px;
+            max-height: none;
+            margin: 0;
+            padding: 0;
             text-align: left;
             color: #334155;
         }
@@ -490,6 +490,238 @@
             min-width: 700px;
         }
 
+        .profile-shell {
+            width: min(92vw, 620px) !important;
+            padding: 0 !important;
+            overflow: hidden;
+            border-radius: 24px !important;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 60px);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 22px 24px;
+            background: linear-gradient(135deg, #0b1c3f, #1e3f74 60%, #0f766e 130%);
+            color: #ffffff;
+        }
+
+        .profile-avatar {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 24px;
+            flex: 0 0 auto;
+        }
+
+        .profile-title {
+            margin: 0;
+            font-size: 22px;
+            line-height: 1.2;
+        }
+
+        .profile-subtitle {
+            margin: 6px 0 0;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .profile-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 10px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .profile-body {
+            padding: 18px 24px 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .profile-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .profile-summary-card {
+            border: 1px solid #dbe5f0;
+            border-radius: 16px;
+            background: #ffffff;
+            padding: 14px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+        }
+
+        .profile-summary-card .label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #5b6473;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .profile-summary-card .label i {
+            color: #1e3f74;
+        }
+
+        .profile-summary-card .value {
+            margin-top: 10px;
+            color: #0f172a;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .profile-section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 0 0 12px;
+            color: #0f172a;
+        }
+
+        .profile-section-title h4 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .profile-section-title span {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .profile-empty-state {
+            padding: 18px;
+            border: 1px dashed #c8d5e3;
+            border-radius: 16px;
+            text-align: center;
+            color: #64748b;
+            background: #ffffff;
+        }
+
+        .profile-empty-state i {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 20px;
+        }
+
+        .profile-reservation-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .profile-reservation-card {
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid #dbe5f0;
+            background: #ffffff;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+        }
+
+        .profile-reservation-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .profile-reservation-route {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .profile-reservation-route i {
+            color: #1e3f74;
+        }
+
+        .profile-reservation-meta {
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 13px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .profile-reservation-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .profile-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .profile-status.confirmed {
+            background: rgba(16, 185, 129, 0.12);
+            color: #047857;
+        }
+
+        .profile-status.pending {
+            background: rgba(245, 158, 11, 0.14);
+            color: #b45309;
+        }
+
+        .profile-status.cancelled {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b91c1c;
+        }
+
+        .profile-reservation-footer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+            color: #475569;
+            font-size: 13px;
+        }
+
+        .profile-reservation-footer span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: #f8fbff;
+            border: 1px solid #e0e8f1;
+        }
+
+        .profile-reservation-footer i {
+            color: #1e3f74;
+        }
+
         /* ===== Responsive fixes for dashboard and reports ===== */
 
         body {
@@ -519,7 +751,7 @@
         }
 
         .report-stat-card h2 {
-            margin: 10px 0;
+            margin: 12px 0 8px;
             color: #0f172a;
         }
 
@@ -569,6 +801,244 @@
             color: #ffffff;
             border-color: #1e3f74;
             box-shadow: 0 8px 16px rgba(30, 63, 116, 0.2);
+        }
+
+        .report-hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            margin-bottom: 18px;
+            padding: 22px 24px;
+            border-radius: 20px;
+            border: 1px solid #dbe5f0;
+            background:
+                radial-gradient(circle at top right, rgba(30, 64, 175, 0.10), transparent 28%),
+                linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .report-hero h2 {
+            margin: 0;
+            font-size: 28px;
+            color: #0f172a;
+        }
+
+        .report-hero p {
+            margin: 8px 0 0;
+            color: #5b6473;
+            max-width: 760px;
+            line-height: 1.5;
+        }
+
+        .report-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 10px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(30, 64, 175, 0.08);
+            color: #0b1c3f;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .report-hero-pills {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+            max-width: 280px;
+        }
+
+        .report-hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ffffff, #f5f9ff);
+            border: 1px solid #dbe5f0;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
+        }
+
+        .report-hero-pill i {
+            color: #1e3f74;
+        }
+
+        .report-stat-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 150px;
+            border: 1px solid #dbe5f0;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        }
+
+        .report-stat-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -22px -22px auto;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 72%);
+            pointer-events: none;
+        }
+
+        .report-stat-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto auto 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #1e3f74, #60a5fa);
+        }
+
+        .report-stat-card.revenue {
+            background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+            border-color: rgba(30, 64, 175, 0.14);
+        }
+
+        .report-stat-card.revenue::before {
+            background: linear-gradient(90deg, #1e3f74, #60a5fa);
+        }
+
+        .report-stat-card.bookings {
+            background: linear-gradient(180deg, #ffffff 0%, #f0f7ff 100%);
+            border-color: rgba(59, 130, 246, 0.14);
+        }
+
+        .report-stat-card.bookings::before {
+            background: linear-gradient(90deg, #2563eb, #93c5fd);
+        }
+
+        .report-stat-card.avg {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border-color: rgba(30, 64, 175, 0.12);
+        }
+
+        .report-stat-card.avg::before {
+            background: linear-gradient(90deg, #1d4ed8, #bfdbfe);
+        }
+
+        .report-stat-card:nth-child(4) {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border-color: rgba(96, 165, 250, 0.14);
+        }
+
+        .report-stat-card:nth-child(4)::before {
+            background: linear-gradient(90deg, #3b82f6, #93c5fd);
+        }
+
+        .report-stat-card:nth-child(5) {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border-color: rgba(96, 165, 250, 0.14);
+        }
+
+        .report-stat-card:nth-child(5)::before {
+            background: linear-gradient(90deg, #60a5fa, #dbeafe);
+        }
+
+        .report-stat-card:nth-child(6) {
+            background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
+            border-color: rgba(37, 99, 235, 0.14);
+        }
+
+        .report-stat-card:nth-child(6)::before {
+            background: linear-gradient(90deg, #1e3f74, #3b82f6);
+        }
+
+        .report-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-card-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .report-card-label i {
+            color: #1e3f74;
+            font-size: 15px;
+        }
+
+        .report-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #1e3f74;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .report-card-note {
+            color: #5b6473;
+            position: relative;
+            z-index: 1;
+        }
+
+        .reports-stats .report-stat-card h2 {
+            position: relative;
+            z-index: 1;
+            font-size: 30px;
+            letter-spacing: -0.02em;
+        }
+
+        .reports-stats .report-stat-card:not(.revenue):not(.bookings):not(.avg) .report-card-label i {
+            color: #3b82f6;
+        }
+
+        .report-stat-card:nth-child(4) .report-card-label i {
+            color: #2563eb;
+        }
+
+        .report-stat-card:nth-child(5) .report-card-label i {
+            color: #3b82f6;
+        }
+
+        .report-stat-card:nth-child(6) .report-card-label i {
+            color: #1e3f74;
+        }
+
+        .action-btn.action-profile {
+            width: auto;
+            min-width: 112px;
+            padding: 0 14px;
+            gap: 8px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #132a50, #1e3f74);
+            color: #ffffff;
+            border-color: #1e3f74;
+            font-weight: 700;
+            box-shadow: 0 8px 16px rgba(30, 63, 116, 0.2);
+        }
+
+        .action-btn.action-profile:hover {
+            background: linear-gradient(135deg, #183663, #245188);
+            box-shadow: 0 10px 20px rgba(30, 63, 116, 0.26);
+        }
+
+        .action-btn.action-profile i {
+            font-size: 13px;
         }
 
         /* Tablet */
@@ -1200,35 +1670,72 @@
     </section>
 
     <section id="reports" class="content">
-        <div class="sectionHeader">
+        <div class="report-hero">
             <div>
-                <h2 style="margin:0;">Reports & Analytics</h2>
+                <p class="report-eyebrow"><i class="fa-solid fa-chart-line"></i> Performance overview</p>
+                <h2>Reports & Analytics</h2>
+                <p>Track revenue quality, booking mix, passenger demand, and route activity across the system.</p>
                 <div class="report-header-controls">
                     <button id="dailyBtn" class="report-filter-btn">Daily</button>
                     <button id="weeklyBtn" class="report-filter-btn">Weekly</button>
                     <button id="monthlyBtn" class="report-filter-btn">Monthly</button>
-
                 </div>
-                <p style="color: gray; font-size: 14px; margin-top: 5px;">Detailed insights and booking history</p>
             </div>
-
+            <div class="report-hero-pills" aria-hidden="true">
+                <span class="report-hero-pill"><i class="fa-solid fa-ticket"></i> Fare mix</span>
+                <span class="report-hero-pill"><i class="fa-solid fa-route"></i> Route patterns</span>
+                <span class="report-hero-pill"><i class="fa-solid fa-users"></i> Passenger demand</span>
+            </div>
         </div>
 
         <div class="reports-stats">
             <div class="report-stat-card revenue">
-                <p style="color:gray; margin:0; font-size: 14px;">Total Revenue</p>
+                <div class="report-card-top">
+                    <span class="report-card-label"><i class="fa-solid fa-sack-dollar"></i>Total Revenue</span>
+                    <span class="report-chip">Confirmed only</span>
+                </div>
                 <h2 id="totalRevenue">0 SR</h2>
-                <p style="color:#28a745; font-size:12px; margin:0;">+0% from previous period</p>
+                <p class="report-card-note">Confirmed bookings in the selected period.</p>
             </div>
             <div class="report-stat-card bookings">
-                <p style="color:gray; margin:0; font-size: 14px;">Total Bookings</p>
+                <div class="report-card-top">
+                    <span class="report-card-label"><i class="fa-solid fa-receipt"></i>Confirmed Bookings</span>
+                    <span class="report-chip">Visible rows</span>
+                </div>
                 <h2 id="totalBookings">0</h2>
-                <p style="color:#007bff; font-size:12px; margin:0;">+0% from previous period</p>
+                <p class="report-card-note">Confirmed bookings currently visible in the selected range.</p>
             </div>
             <div class="report-stat-card avg">
-                <p style="color:gray; margin:0; font-size: 14px;">Avg. Ticket Price</p>
+                <div class="report-card-top">
+                    <span class="report-card-label"><i class="fa-solid fa-coins"></i>Avg. Ticket Price</span>
+                    <span class="report-chip">Per booking</span>
+                </div>
                 <h2 id="avgPrice">0 SR</h2>
-                <p style="color:#6f42c1; font-size:12px; margin:0;">+0% from previous period</p>
+                <p class="report-card-note">Average value of confirmed bookings.</p>
+            </div>
+            <div class="report-stat-card">
+                <div class="report-card-top">
+                    <span class="report-card-label"><i class="fa-solid fa-circle-check"></i>Confirmation Rate</span>
+                    <span class="report-chip">Quality</span>
+                </div>
+                <h2 id="confirmationRate">0%</h2>
+                <p class="report-card-note">Share of visible bookings that are confirmed.</p>
+            </div>
+            <div class="report-stat-card">
+                <div class="report-card-top">
+                    <span class="report-card-label"><i class="fa-solid fa-star"></i>VIP Bookings</span>
+                    <span class="report-chip">Premium mix</span>
+                </div>
+                <h2 id="vipBookings">0</h2>
+                <p class="report-card-note">Confirmed VIP reservations in the selected period.</p>
+            </div>
+            <div class="report-stat-card">
+                <div class="report-card-top">
+                    <span class="report-card-label"><i class="fa-solid fa-route"></i>Top Route</span>
+                    <span class="report-chip">Activity</span>
+                </div>
+                <h2 id="topRoute">No data</h2>
+                <p class="report-card-note" id="topRouteNote">Most active route in the selected period.</p>
             </div>
         </div>
         <div class="table-wrapper">
@@ -1593,7 +2100,7 @@
         <button onclick="deleteRow(this)" class="action-btn action-delete" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>`;
 
             if (currentTable === "Passenger") {
-                actionHtml += ` <button onclick="openPassengerProfile(this)" class="action-btn neutral-btn" style="margin-left:5px">Profile</button>`;
+                actionHtml += ` <button onclick="openPassengerProfile(this)" class="action-btn action-profile" aria-label="Open passenger profile"><i class="fa-solid fa-user"></i><span>Profile</span></button>`;
             }
 
             actionCell.innerHTML = actionHtml;
@@ -1794,90 +2301,128 @@
         }
 
 
-        function updateReportAnalytics() {
+        function matchesReportPeriod(rowDate, type, now) {
+            if (!type) return true;
+            if (type === "daily") {
+                return rowDate.toDateString() === now.toDateString();
+            }
+
+            if (type === "weekly") {
+                const diff = (now - rowDate) / (1000 * 60 * 60 * 24);
+                return diff <= 7;
+            }
+
+            if (type === "monthly") {
+                return rowDate.getMonth() === now.getMonth() && rowDate.getFullYear() === now.getFullYear();
+            }
+
+            return true;
+        }
+
+        function getReportMetrics(type) {
             const rows = document.querySelectorAll("#historyTable tr");
-            let totalRev = 0;
-            let count = 0;
+            const now = new Date();
+            const routeCounts = {};
+            const passengerSet = new Set();
+            let totalRevenue = 0;
+            let confirmedBookings = 0;
+            let vipBookings = 0;
+            let seatsSold = 0;
+            let visibleRows = 0;
 
             rows.forEach(row => {
-                // Look at index 8 for status, index 7 for price
-                if (row.cells.length >= 9 && row.cells[8].innerText.includes("Confirmed")) {
+                if (row.cells.length < 9) return;
 
-                    // This line strips away "SR" and any spaces so parseFloat only sees numbers
-                    let cleanPrice = row.cells[7].innerText.replace(/[^\d.-]/g, '');
-                    let priceNum = parseFloat(cleanPrice);
+                const dateText = row.cells[1].innerText.trim();
+                const rowDate = new Date(dateText + "T00:00:00");
+                const isVisible = matchesReportPeriod(rowDate, type, now);
+                row.style.display = isVisible ? "" : "none";
 
+                if (!isVisible) return;
+
+                visibleRows++;
+
+                const passenger = row.cells[2].innerText.trim();
+                const route = row.cells[5].innerText.trim();
+                const statusText = row.cells[8].innerText.trim();
+                const ticketType = row.cells[4].innerText.trim();
+                const seatsText = row.cells[6].innerText.trim().replace(/[^\d.-]/g, "");
+                const seatsNum = parseInt(seatsText, 10);
+
+                if (passenger) passengerSet.add(passenger);
+                if (route) routeCounts[route] = (routeCounts[route] || 0) + 1;
+                if (!isNaN(seatsNum)) seatsSold += seatsNum;
+
+                const isConfirmed = statusText.includes("Confirmed");
+                const isVipTicket = ticketType.includes("VIP");
+
+                if (isConfirmed) {
+                    confirmedBookings++;
+
+                    const priceText = row.cells[7].innerText.replace(/[^\d.-]/g, "");
+                    const priceNum = parseFloat(priceText);
                     if (!isNaN(priceNum)) {
-                        totalRev += priceNum;
-                        count++;
+                        totalRevenue += priceNum;
+                    }
+
+                    if (isVipTicket) {
+                        vipBookings++;
                     }
                 }
             });
 
-            // Update the UI
+            const topRouteEntry = Object.entries(routeCounts).sort((a, b) => b[1] - a[1])[0] || null;
+
+            return {
+                totalRevenue,
+                confirmedBookings,
+                avgPrice: confirmedBookings > 0 ? totalRevenue / confirmedBookings : 0,
+                confirmationRate: visibleRows > 0 ? Math.round((confirmedBookings / visibleRows) * 100) : 0,
+                vipBookings,
+                topRoute: topRouteEntry ? topRouteEntry[0] : "No data",
+                topRouteCount: topRouteEntry ? topRouteEntry[1] : 0,
+                uniquePassengers: passengerSet.size,
+                seatsSold,
+            };
+        }
+
+        function updateReportAnalytics() {
+            const metrics = getReportMetrics(null);
+
             const revEl = document.getElementById("totalRevenue");
             const bookEl = document.getElementById("totalBookings");
             const avgEl = document.getElementById("avgPrice");
+            const rateEl = document.getElementById("confirmationRate");
+            const vipEl = document.getElementById("vipBookings");
+            const topRouteEl = document.getElementById("topRoute");
+            const topRouteNoteEl = document.getElementById("topRouteNote");
 
-            if (revEl) revEl.innerText = totalRev.toFixed(2) + " SR";
-            if (bookEl) bookEl.innerText = count;
-            if (avgEl) {
-                let avg = count > 0 ? (totalRev / count).toFixed(2) : 0;
-                avgEl.innerText = avg + " SR";
+            if (revEl) revEl.innerText = metrics.totalRevenue.toFixed(2) + " SR";
+            if (bookEl) bookEl.innerText = metrics.confirmedBookings;
+            if (avgEl) avgEl.innerText = metrics.avgPrice.toFixed(2) + " SR";
+            if (rateEl) rateEl.innerText = metrics.confirmationRate + "%";
+            if (vipEl) vipEl.innerText = metrics.vipBookings;
+            if (topRouteEl) topRouteEl.innerText = metrics.topRoute;
+            if (topRouteNoteEl) {
+                topRouteNoteEl.innerText = metrics.topRouteCount > 0
+                    ? metrics.topRouteCount + " booking" + (metrics.topRouteCount === 1 ? "" : "s") + " on this route"
+                    : "Most active route in the selected period.";
             }
         }
 
 
         function filterReport(type) {
-            const rows = document.querySelectorAll("#historyTable tr");
-            const now = new Date();
-            let totalRev = 0;
-            let bookings = 0;
+            const metrics = getReportMetrics(type);
 
-            rows.forEach(row => {
-                // Must have 9 cells to be a valid report row
-                if (row.cells.length < 9) return;
-
-                const dateText = row.cells[1].innerText; // Date is at index 1
-                const rowDate = new Date(dateText + "T00:00:00");
-                let includeByDate = false;
-
-                // 1. Check if the row falls within the selected time range
-                if (type === "daily") {
-                    if (rowDate.toDateString() === now.toDateString()) includeByDate = true;
-                } else if (type === "weekly") {
-                    const diff = (now - rowDate) / (1000 * 60 * 60 * 24);
-                    if (diff <= 7) includeByDate = true;
-                } else if (type === "monthly") {
-                    if (rowDate.getMonth() === now.getMonth() && rowDate.getFullYear() === now.getFullYear()) {
-                        includeByDate = true;
-                    }
-                }
-
-                // 2. Show or Hide the row based on the date
-                if (includeByDate) {
-                    row.style.display = "";
-
-                    // 3. Update the analytics for the filtered view
-                    // Check status at index 8 and price at index 7
-                    if (row.cells[8].innerText.includes("Confirmed")) {
-                        const priceText = row.cells[7].innerText.replace(/[^\d.-]/g, '');
-                        const priceNum = parseFloat(priceText);
-                        if (!isNaN(priceNum)) {
-                            totalRev += priceNum;
-                            bookings++;
-                        }
-                    }
-                } else {
-                    row.style.display = "none";
-                }
-            });
-
-            // 4. Update the cards with the filtered totals
-            document.getElementById("totalRevenue").innerText = totalRev.toFixed(2) + " SR";
-            document.getElementById("totalBookings").innerText = bookings;
-            const avg = bookings > 0 ? (totalRev / bookings).toFixed(2) : 0;
-            document.getElementById("avgPrice").innerText = avg + " SR";
+            document.getElementById("totalRevenue").innerText = metrics.totalRevenue.toFixed(2) + " SR";
+            document.getElementById("totalBookings").innerText = metrics.confirmedBookings;
+            document.getElementById("avgPrice").innerText = metrics.avgPrice.toFixed(2) + " SR";
+            document.getElementById("confirmationRate").innerText = metrics.confirmationRate + "%";
+            document.getElementById("vipBookings").innerText = metrics.vipBookings;
+            document.getElementById("topRoute").innerText = metrics.topRoute;
+            document.getElementById("topRouteNote").innerText = metrics.topRouteCount > 0
+                ? metrics.topRouteCount + " booking" + (metrics.topRouteCount === 1 ? "" : "s") + " on this route"
+                : "Most active route in the selected period.";
         }
 
         document.getElementById("logoutBtn").onclick = () => { localStorage.removeItem("role"); window.location.href = "index.html"; };
@@ -2431,29 +2976,98 @@
             let userReservations = reservations
                 .filter(r => r.passenger === name)
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
-            // 👆 ترتيب من الأحدث إلى الأقدم
+            const confirmedReservations = userReservations.filter(r => (r.status || "").includes("Confirmed")).length;
+            const totalSeats = userReservations.reduce((sum, r) => sum + (parseInt(r.seatsNeeded, 10) || parseInt(r.seats, 10) || 1), 0);
+            const latestDate = userReservations[0]?.date || "No reservation history";
 
             let html = `
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Phone:</b> ${phone}</p>
-        <hr>
-        <h4>Reservations:</h4>
-    `;
+                <div class="profile-header">
+                    <div class="profile-avatar" aria-hidden="true"><i class="fa-solid fa-user"></i></div>
+                    <div>
+                        <p class="profile-subtitle" style="margin:0;">Passenger record</p>
+                        <h3 class="profile-title">${name}</h3>
+                        <p class="profile-subtitle">Customer profile and reservation history</p>
+                        <span class="profile-badge"><i class="fa-solid fa-id-card"></i> ID ${id}</span>
+                    </div>
+                </div>
+                <div class="profile-body">
+                    <div class="profile-summary-grid">
+                        <div class="profile-summary-card">
+                            <div class="label"><i class="fa-solid fa-envelope"></i>Email</div>
+                            <div class="value">${email || "Not available"}</div>
+                        </div>
+                        <div class="profile-summary-card">
+                            <div class="label"><i class="fa-solid fa-phone"></i>Phone</div>
+                            <div class="value">${phone || "Not available"}</div>
+                        </div>
+                        <div class="profile-summary-card">
+                            <div class="label"><i class="fa-solid fa-ticket"></i>Reservations</div>
+                            <div class="value">${userReservations.length}</div>
+                        </div>
+                        <div class="profile-summary-card">
+                            <div class="label"><i class="fa-solid fa-circle-check"></i>Confirmed</div>
+                            <div class="value">${confirmedReservations}</div>
+                        </div>
+                        <div class="profile-summary-card">
+                            <div class="label"><i class="fa-solid fa-chair"></i>Seats Booked</div>
+                            <div class="value">${totalSeats}</div>
+                        </div>
+                        <div class="profile-summary-card">
+                            <div class="label"><i class="fa-solid fa-calendar-days"></i>Latest Trip</div>
+                            <div class="value">${latestDate}</div>
+                        </div>
+                    </div>
+                    <div class="profile-section-title">
+                        <h4>Reservation History</h4>
+                        <span>${userReservations.length} record${userReservations.length === 1 ? "" : "s"}</span>
+                    </div>
+                    <div class="profile-reservation-list">
+            `;
 
-            userReservations.forEach(r => {
-                let type = r.ticketType === "VIP"
-                    ? "<span class='vip'>VIP</span>"
-                    : "Standard";
-
+            if (userReservations.length === 0) {
                 html += `
-        <p>🚆 ${r.train} - ${r.date} - ${r.status}</p>
-        <p>🎫 Type: ${r.type} </p>
-        <hr>
-    `;
-            });
-            //let totalSeats = userReservations.reduce((sum, r) => sum + (r.seatsNeeded || 1), 0);
-           // html += `<p><b>Total Tickets Booked:</b> ${totalSeats}</p>`;
+                    <div class="profile-empty-state">
+                        <i class="fa-regular fa-folder-open"></i>
+                        <p style="margin:0;">No reservations found for this passenger.</p>
+                    </div>
+                `;
+            } else {
+                userReservations.forEach(r => {
+                    const ticketType = (r.ticketType || r.type || "Standard").trim();
+                    const status = (r.status || "Pending").trim();
+                    const statusClass = status.toLowerCase().includes("confirm")
+                        ? "confirmed"
+                        : status.toLowerCase().includes("cancel")
+                            ? "cancelled"
+                            : "pending";
+                    const seats = r.seatsNeeded || r.seats || 1;
+
+                    html += `
+                        <div class="profile-reservation-card">
+                            <div class="profile-reservation-top">
+                                <div>
+                                    <div class="profile-reservation-route"><i class="fa-solid fa-train-subway"></i>${r.train || "Unknown train"}</div>
+                                    <div class="profile-reservation-meta">
+                                        <span><i class="fa-solid fa-calendar-days"></i>${r.date || "No date"}</span>
+                                        <span><i class="fa-solid fa-location-dot"></i>${r.route || "Route not specified"}</span>
+                                    </div>
+                                </div>
+                                <span class="profile-status ${statusClass}">${status}</span>
+                            </div>
+                            <div class="profile-reservation-footer">
+                                <span><i class="fa-solid fa-ticket"></i>${ticketType}</span>
+                                <span><i class="fa-solid fa-chair"></i>${seats} seat${parseInt(seats, 10) === 1 ? "" : "s"}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
             document.getElementById("profileContent").innerHTML = html;
             document.getElementById("profileModal").style.display = "flex";
         }
@@ -2511,6 +3125,8 @@
     </div>
     <script src="storage.js"></script>
     <script src="dashboard.js"></script>
+    <script src="chatbot.js"></script>
+    <script src="theme-toggle.js"></script>
     <div id="bookingConfirmModal" class="modal-surface">
 
         <h3>Confirm Booking</h3>
@@ -2543,10 +3159,11 @@
         </div>
     </div>
     <div id="profileModal" class="modal-overlay">
-        <div class="modal-surface" style="width:300px;">
-            <h3>Passenger Profile</h3>
+        <div class="modal-surface profile-shell">
             <div id="profileContent"></div>
-            <button onclick="closeProfile()">Close</button>
+            <div style="padding: 0 24px 24px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);">
+                <button onclick="closeProfile()" class="neutral-btn" style="width:100%;">Close</button>
+            </div>
         </div>
     </div>
 
