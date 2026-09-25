@@ -8,24 +8,6 @@
 <link rel="stylesheet" href="style.css">
 
 </head>
-<!-- <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const loginForm = document.getElementById("loginForm");
-
-    loginForm.addEventListener("submit", function(e){
-        e.preventDefault();
-
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
-
-       const users = JSON.parse(localStorage.getItem("systemUsers")) || [];
-
-        const user = users.find(u => u.username === username && u.password === password);
-
-        
-    });
-});
-</script> -->
 <body>
 
 <div class="login-container">
@@ -79,37 +61,35 @@ document.addEventListener("DOMContentLoaded", function() {
     const codeError = document.getElementById("codeError");
     let verificationCode = "";
 
-    loginForm.addEventListener("submit", function(e){
+    loginForm.addEventListener("submit", async function(e){
         e.preventDefault();
-        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();
-        const users = JSON.parse(localStorage.getItem("systemUsers")) || [];
+        document.getElementById("error").innerText = "";
 
-        const user = users.find(u => u.username === username && u.password === password);
-        if(user){
-            localStorage.setItem("currentUser", JSON.stringify(user));
-            localStorage.setItem("role", user.role);
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-            // توليد رمز 4 أرقام عشوائي
-            verificationCode = Math.floor(1000 + Math.random()*9000).toString();
-            console.log("Verification code (for testing):", verificationCode);
-
-            // إظهار المربعات فارغة
-            codeBoxes.forEach(box => box.value = "");
-            verificationContainer.style.display = "block";
-
-            // تعبئة الأرقام تلقائيًا بعد 2 ثانية
-            setTimeout(() => {
-                codeBoxes.forEach((box, idx) => {
-                    setTimeout(() => {
-                        box.value = verificationCode[idx];
-                    }, idx * 300); // كل رقم يظهر بعد 300ms عن الرقم السابق
-                });
-            }, 2000); // الانتظار ثانيتين قبل البدء
-
-        } else {
-            document.getElementById("error").innerText = "Invalid username or password!";
+        if (error) {
+            document.getElementById("error").innerText = error.message;
+            return;
         }
+
+        // توليد رمز 4 أرقام عشوائي
+        verificationCode = Math.floor(1000 + Math.random()*9000).toString();
+        console.log("Verification code (for testing):", verificationCode);
+
+        // إظهار المربعات فارغة
+        codeBoxes.forEach(box => box.value = "");
+        verificationContainer.style.display = "block";
+
+        // تعبئة الأرقام تلقائيًا بعد 2 ثانية
+        setTimeout(() => {
+            codeBoxes.forEach((box, idx) => {
+                setTimeout(() => {
+                    box.value = verificationCode[idx];
+                }, idx * 300); // كل رقم يظهر بعد 300ms عن الرقم السابق
+            });
+        }, 2000); // الانتظار ثانيتين قبل البدء
     });
 
     // التحقق عند الضغط على زر Verify
@@ -123,28 +103,14 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
-<label>UserID</label>
-<input type="text" id="username" placeholder="Enter Your ID" required>
+<label>Email</label>
+<input type="email" id="username" placeholder="Enter Your Email" required>
 
 <label>Password</label>
 <input type="password" id="password" placeholder="Enter password" required>
 <p style="text-align:left; margin-top:5px;">
   <a href="reset_password.html" style="color:blue; text-decoration:underline;">Forgot Password?</a>
 </p>
-<div class="role">
-  <p>Login as</p>
-
-  <label class="radio">
-    <input type="radio" name="role" value="staff" checked>
-    Staff
-  </label>
-
-  <label class="radio">
-    <input type="radio" name="role" value="admin">
-    Admin
-  </label>
-</div>
-
 <button type="submit">Sign In</button>
 <p class="signup-link">
 Don't have an account?
@@ -201,9 +167,6 @@ Don't have an account?
 
 </div>
 <script>
-   
-    
-//localStorage.setItem("currentUser", JSON.stringify(user));
 function showSignup(){
 document.getElementById("loginForm").style.display="none";
 document.getElementById("signupForm").style.display="block";
@@ -216,7 +179,8 @@ document.getElementById("loginForm").style.display="block";
 
 </script>
 
-<script src="users.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
 <script src="auth.js"></script>
 <script src="chatbot.js"></script>
 <script src="theme-toggle.js"></script>

@@ -1,4 +1,4 @@
-document.getElementById("signupForm").onsubmit = function(e) {
+document.getElementById("signupForm").onsubmit = async function(e) {
     e.preventDefault();
 
     const name = document.getElementById("newUsername").value.trim();
@@ -35,16 +35,21 @@ document.getElementById("signupForm").onsubmit = function(e) {
         return;
     }
 
-    // ✅ تحقق من اسم المستخدم مكرر
-    let users = JSON.parse(localStorage.getItem("systemUsers")) || [];
-    if (users.find(u => u.username === name)) {
-        document.getElementById("signupError").innerText = "Username already taken!";
+    // ✅ إنشاء الحساب عبر Supabase Auth
+    document.getElementById("signupError").innerText = "";
+
+    const { error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: pass,
+        options: {
+            data: { username: name, role: role.toUpperCase() }
+        }
+    });
+
+    if (error) {
+        document.getElementById("signupError").innerText = error.message;
         return;
     }
-
-    // ✅ كل شيء تمام → إضافة المستخدم
-    users.push({ username: name, email: email, password: pass, role: role });
-    localStorage.setItem("systemUsers", JSON.stringify(users));
 
     alert("Account created! You can now log in.");
     showLogin();

@@ -1,63 +1,93 @@
 // storage.js
+// Loads/persists trains, passengers, reservations and history from Supabase.
+// Row-level Supabase writes now happen at the point of each add/edit/delete
+// action in admin.html, so saveAllData() is kept only so existing call sites
+// don't need to change, and clearAllSystemData() wipes the operational tables.
 
-function saveAllData() {
+async function loadAllData() {
     const trainTable = document.getElementById("trainTable");
     const passengerTable = document.getElementById("passengerTable");
     const reservationTable = document.getElementById("reservationTable");
+    const historyTable = document.getElementById("historyTable");
 
-    if (trainTable) localStorage.setItem("trains", trainTable.innerHTML);
-    if (passengerTable) localStorage.setItem("passengers", passengerTable.innerHTML);
-    if (reservationTable) localStorage.setItem("reservations", reservationTable.innerHTML);
+    if (trainTable) {
+        const { data: trains, error } = await supabaseClient.from("trains").select("*").order("created_at");
+        if (error) { console.error("Could not load trains:", error.message); }
+        trainTable.innerHTML = "";
+        currentTable = "Train";
+        (trains || []).forEach((t, idx) => {
+            const total = t.standard_seats + t.vip_seats;
+            const available = t.available_standard_seats + t.available_vip_seats;
+            const row = insertNewRow([
+                "T" + (idx + 10), t.name, t.route, total, available,
+                t.status, t.departure_time, t.arrival_time,
+                `STD ${t.standard_price} / VIP ${t.vip_price}`
+            ], t.id);
+            row.cells[5].style.color = t.status === "Full" ? "red" : "green";
+            row.dataset.standardAvailable = t.available_standard_seats;
+            row.dataset.vipAvailable = t.available_vip_seats;
+            row.dataset.standardPrice = t.standard_price;
+            row.dataset.vipPrice = t.vip_price;
+            row.dataset.standardSeats = t.standard_seats;
+            row.dataset.vipSeats = t.vip_seats;
+        });
+    }
 
-    const history = [];
-    const historyRows = document.querySelectorAll("#historyTable tr");
+    if (passengerTable) {
+        const { data: passengers, error } = await supabaseClient.from("passengers").select("*").order("created_at");
+        if (error) { console.error("Could not load passengers:", error.message); }
+        passengerTable.innerHTML = "";
+        currentTable = "Passenger";
+        (passengers || []).forEach((p, idx) => {
+            insertNewRow(["P" + (idx + 10), p.name, p.email, p.phone], p.id);
+        });
+    }
 
-    historyRows.forEach(row => {
-        // We check for 9 because that's our full report structure
-        if (row.cells.length >= 9) {
-            history.push({
-                id: row.cells[0].innerText,
-                date: row.cells[1].innerText,
-                passenger: row.cells[2].innerText,
-                train: row.cells[3].innerText,
-                type: row.cells[4].innerText,
-                route: row.cells[5].innerText,
-                seats: row.cells[6].innerText,
-                price: row.cells[7].innerText,
-                status: row.cells[8].innerText
-            });
-        }
-    });
+    if (reservationTable) {
+        const { data: reservations, error } = await supabaseClient
+            .from("reservations")
+            .select("*, passengers(name), trains(name)")
+            .order("created_at");
+        if (error) { console.error("Could not load reservations:", error.message); }
+        reservationTable.innerHTML = "";
+        currentTable = "Reservation";
+        (reservations || []).forEach((r, idx) => {
+            const passengerName = r.passengers ? r.passengers.name : "Unknown";
+            const trainName = r.trains ? r.trains.name : "Unknown";
+            const row = insertNewRow([
+                "R" + (idx + 10), passengerName, trainName, r.ticket_type, r.seats, r.reservation_date, r.status
+            ], r.id);
+            if (r.status === "Canceled") {
+                row.cells[6].innerHTML = "<span style='color:red'>Canceled</span>";
+                const delBtn = row.querySelector(".action-delete");
+                if (delBtn) delBtn.style.display = "none";
+            }
+        });
+    }
 
-    localStorage.setItem("trainHistory", JSON.stringify(history));
-}
-
-function loadAllData() {
-    const savedTrains = localStorage.getItem("trains");
-    const savedPassengers = localStorage.getItem("passengers");
-    const savedReservations = localStorage.getItem("reservations");
-
-    if (savedTrains) document.getElementById("trainTable").innerHTML = savedTrains;
-    if (savedPassengers) document.getElementById("passengerTable").innerHTML = savedPassengers;
-    if (savedReservations) document.getElementById("reservationTable").innerHTML = savedReservations;
-
-    const hTable = document.getElementById("historyTable");
-    if (hTable) {
-        const savedHistory = JSON.parse(localStorage.getItem("trainHistory") || "[]");
-
-        if (savedHistory.length > 0) {
-            hTable.innerHTML = "";
-            savedHistory.forEach(item => {
-                // Inside storage.js -> loadAllData loop
-                const row = hTable.insertRow();
-                row.innerHTML = `
-    <td>${item.id}</td>
-    <td>${item.date}</td>
-    <td>${item.passenger}</td>
-    <td>${item.train}</td>
-    <td>${item.type}</td>   <td>${item.route}</td>  <td>${item.seats}</td>  <td>${item.price}</td>  <td>${item.status}</td> `;
-            });
-        }
+    if (historyTable) {
+        const { data: history, error } = await supabaseClient
+            .from("history")
+            .select("*")
+            .order("created_at", { ascending: false });
+        if (error) { console.error("Could not load history:", error.message); }
+        historyTable.innerHTML = "";
+        (history || []).forEach(h => {
+            const row = historyTable.insertRow();
+            row.dataset.dbId = h.id;
+            if (h.reservation_id) row.dataset.reservationDbId = h.reservation_id;
+            row.innerHTML = `
+                <td>${h.id.slice(0, 8)}</td>
+                <td>${h.reservation_date}</td>
+                <td>${h.passenger_name}</td>
+                <td>${h.train_name}</td>
+                <td>${h.ticket_type === "VIP" ? "<span class='vip'>VIP</span>" : "Standard"}</td>
+                <td>${h.route}</td>
+                <td>${h.seats}</td>
+                <td>${h.price}</td>
+                <td><span style="color:${h.status === "Confirmed" ? "green" : "red"}">${h.status}</span></td>
+            `;
+        });
     }
 
     // Final touch: Refresh the cards after loading
@@ -66,11 +96,17 @@ function loadAllData() {
     }
 }
 
-function clearAllSystemData() {
-    if (confirm("Are you sure you want to wipe all system data? This cannot be undone.")) {
-        localStorage.clear();
+function saveAllData() {
+    // No-op: every add/edit/delete action already writes straight to Supabase
+    // at the point it happens, so there's nothing left to bulk-persist here.
+}
+
+async function clearAllSystemData() {
+    if (confirm("Are you sure you want to wipe all system data (trains, passengers, reservations, history)? This cannot be undone.")) {
+        await supabaseClient.from("history").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        await supabaseClient.from("reservations").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        await supabaseClient.from("trains").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        await supabaseClient.from("passengers").delete().neq("id", "00000000-0000-0000-0000-000000000000");
         location.reload();
     }
 }
-
-setTimeout(updateReportAnalytics, 150);
