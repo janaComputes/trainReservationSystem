@@ -148,6 +148,7 @@
       bottom: 18px;
       z-index: 2147483001;
       display: inline-flex;
+      width: fit-content;
       align-items: center;
       gap: 10px;
       border: 1px solid rgba(148, 163, 184, 0.2);
@@ -259,9 +260,6 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(toggleButton);
-    if (document.querySelector(".login-container") && document.getElementById("signupForm")) {
-      toggleButton.classList.add("auth-page");
-    }
     applyTheme(getPreferredTheme());
   });
 })();

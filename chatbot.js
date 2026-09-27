@@ -80,6 +80,7 @@
       bottom: 20px;
       z-index: 2147483000;
       display: inline-flex;
+      width: fit-content;
       align-items: center;
       gap: 10px;
       border: 0;
@@ -310,6 +311,7 @@
       cursor: pointer;
       font-size: 12px;
       font-weight: 600;
+      width: fit-content;
     }
 
     html.dark-mode .tr-chatbot-chip {
@@ -353,6 +355,7 @@
       border: 0;
       border-radius: 14px;
       padding: 0 16px;
+      width: auto;
       min-width: 72px;
       background: linear-gradient(135deg, var(--tr-chatbot-brand), var(--tr-chatbot-brand-2));
       color: #ffffff;
@@ -441,10 +444,6 @@
 
   document.body.appendChild(launcher);
   document.body.appendChild(panel);
-
-  if (document.querySelector(".login-container") && document.getElementById("signupForm")) {
-    launcher.classList.add("auth-page");
-  }
 
   const messages = panel.querySelector(".tr-chatbot-messages");
   const suggestionsHost = panel.querySelector(".tr-chatbot-suggestions");
