@@ -2273,9 +2273,23 @@
                     return; // User clicked 'Cancel' on the confirm box
                 }
             } else {
+                const table = row.parentElement.id.replace("Table", "");
+                const tableName = table === "train" ? "trains" : "passengers";
+
+                if (tableName === "passengers" && row.dataset.dbId) {
+                    const { count, error: checkError } = await supabaseClient
+                        .from("reservations")
+                        .select("*", { count: "exact", head: true })
+                        .eq("passenger_id", row.dataset.dbId)
+                        .neq("status", "Canceled");
+                    if (checkError) { alert("Could not check passenger's reservations: " + checkError.message); return; }
+                    if (count > 0) {
+                        alert("This passenger has active reservations and cannot be deleted. Cancel their reservations first.");
+                        return;
+                    }
+                }
+
                 if (confirm("Are you sure you want to delete this entry permanently?")) {
-                    const table = row.parentElement.id.replace("Table", "");
-                    const tableName = table === "train" ? "trains" : "passengers";
                     if (row.dataset.dbId) {
                         const { error } = await supabaseClient.from(tableName).delete().eq("id", row.dataset.dbId);
                         if (error) { alert("Could not delete: " + error.message); return; }
@@ -2968,6 +2982,12 @@
                 return;
             }
 
+            const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+            if (!passRegex.test(newPass)) {
+                alert("Password must be at least 8 characters, include a number, a symbol, and a capital letter.");
+                return;
+            }
+
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) { alert("Session expired, please log in again."); return; }
 
@@ -3190,7 +3210,11 @@
 
             <input type="password" id="oldPassword" placeholder="Current Password"><br><br>
 
-            <input type="password" id="newPasswordChange" placeholder="New Password"><br><br>
+            <input type="password" id="newPasswordChange" placeholder="New Password">
+            <small style="color:gray; font-size:12px; display:block; margin-top:4px;">
+                Password must be at least 8 characters, include a number, a symbol, and a capital letter.
+            </small>
+            <br>
 
             <input type="password" id="confirmPassword" placeholder="Confirm Password"><br><br>
 
@@ -3217,23 +3241,6 @@
     </div>
 
 
-    <div id="changePasswordModal" class="modal-overlay">
-
-        <div class="modal-surface modal-compact">
-
-            <h3>Change Password</h3>
-
-            <input type="password" id="oldPassword" placeholder="Current Password"><br><br>
-
-            <input type="password" id="newPasswordChange" placeholder="New Password"><br><br>
-
-            <input type="password" id="confirmPassword" placeholder="Confirm Password"><br><br>
-
-            <button onclick="changePassword()">Save</button>
-            <button onclick="closeChangePassword()">Cancel</button>
-
-        </div>
-    </div>
     <div id="profileModal" class="modal-overlay">
         <div class="modal-surface profile-shell">
             <div id="profileContent"></div>
