@@ -12,7 +12,9 @@
         // Resolves once we know whether the visitor is signed in and what role they hold.
         // Anything that needs auth state must `await window.authReady` first.
         window.authReady = (async function () {
-            const { data: { session } } = await supabaseClient.auth.getSession();
+            try {
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError) throw sessionError;
 
             if (!session) {
                 console.log("Access Denied. Redirecting...");
@@ -20,16 +22,22 @@
                 return null;
             }
 
-            const { data: profile } = await supabaseClient
+            const { data: profile, error: profileError } = await supabaseClient
                 .from("profiles")
                 .select("role, username")
                 .eq("id", session.user.id)
                 .single();
 
+            if (profileError) console.error("Could not load profile:", profileError.message);
             window.currentUserId = session.user.id;
             window.currentUserRole = profile ? profile.role : "STAFF";
             window.currentUsername = profile ? profile.username : session.user.email;
             return window.currentUserRole;
+            } catch (error) {
+                alert("Could not check account access: " + error.message);
+                window.location.replace("index.html");
+                return null;
+            }
         })();
     </script>
     <style>
@@ -1807,7 +1815,8 @@
             const role = await window.authReady;
             if (!role) return; // authReady already redirected to index.html
 
-            if (typeof loadAllData === "function") await loadAllData();
+            try { if (typeof loadAllData === "function") await loadAllData(); }
+            catch (error) { alert("Could not load some system data: " + error.message); }
 
 
             updateReportAnalytics();
@@ -1846,7 +1855,8 @@
 
         async function handleLogout() {
             // 1. End the Supabase session
-            await supabaseClient.auth.signOut();
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) { alert(error.message); return; }
 
             // 2. Alert the user (Optional, but good for feedback)
             alert("Logging out...");
@@ -1946,7 +1956,7 @@
 
             closeBookingModal();
 
-            alert("Booking confirmed successfully!");
+            // This control only closes the summary; saving happens in the save handler.
 
         }
 
@@ -1959,204 +1969,43 @@
 
 
         document.getElementById("saveBtn").onclick = async function () {
-            console.log("SAVE CLICKED");
-
-            // 1. COLLECT DATA
-            let name = document.getElementById("input1").value.trim();
-            let emailOrRoute = document.getElementById("input2").value.trim();
-            let standard = parseInt(document.getElementById("inputStandardSeats").value) || 0;
-            let vip = parseInt(document.getElementById("inputVipSeats").value) || 0;
-            let stdPrice = parseFloat(document.getElementById("inputStandardPrice").value) || 0;
-            let vipPrice = parseFloat(document.getElementById("inputVipPrice").value) || 0;
-            let total = standard + vip;
-
-            // 2. HANDLE EDITING (Train Management)
-            if (editingRow && currentTable === "Train") {
-                const statusText = total <= 0 ? "Full" : "Available";
-
-                const { error } = await supabaseClient.from("trains").update({
-                    name: name,
-                    route: emailOrRoute,
-                    standard_seats: standard,
-                    vip_seats: vip,
-                    available_standard_seats: standard,
-                    available_vip_seats: vip,
-                    standard_price: stdPrice,
-                    vip_price: vipPrice,
-                    status: statusText
-                }).eq("id", editingRow.dataset.dbId);
-
-                if (error) { alert("Could not update train: " + error.message); return; }
-
-                editingRow.cells[1].innerText = name;
-                editingRow.cells[2].innerText = emailOrRoute;
-                editingRow.cells[3].innerText = total;
-                editingRow.cells[4].innerText = total;
-
-                // STATUS LOGIC
-                editingRow.cells[5].innerText = statusText;
-                editingRow.cells[5].style.color = total <= 0 ? "red" : "green";
-
-                editingRow.cells[8].innerText = `STD ${stdPrice} / VIP ${vipPrice}`;
-
-                // Sync hidden data
-                editingRow.dataset.standardAvailable = standard;
-                editingRow.dataset.vipAvailable = vip;
-                editingRow.dataset.standardPrice = stdPrice;
-                editingRow.dataset.vipPrice = vipPrice;
-                editingRow.dataset.standardSeats = standard;
-                editingRow.dataset.vipSeats = vip;
-
-                finishSave();
-                return;
-            }
-
-            // 3. ADDING NEW RESERVATION
-            if (currentTable === "Reservation") {
-                const passenger = document.getElementById("passengerSelect").value;
-                const train = document.getElementById("trainSelect").value;
-                const date = document.getElementById("input3").value;
-                const ticketType = document.getElementById("ticketType").value;
-
-                if (!passenger || !train || !date) {
-                    alert("Select a passenger and train."); return;
+            const button = this;
+            if (button.disabled) return;
+            button.disabled = true;
+            let persisted = false;
+            try {
+                const value = id => document.getElementById(id).value.trim();
+                const id = editingRow?.dataset.dbId;
+                let result;
+                if (currentTable === "Passenger") {
+                    const payload = { name: value("input1"), email: value("input2"), phone: value("inputPhone") };
+                    if (!payload.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email) || !/^\+9665\d{8}$/.test(payload.phone)) throw Error("Enter a name, valid email, and phone in +9665XXXXXXXX format.");
+                    result = await (id ? supabaseClient.from("passengers").update(payload).eq("id", id) : supabaseClient.from("passengers").insert(payload)).select().single();
+                } else if (currentTable === "Train") {
+                    const payload = { name: value("input1"), route: value("input2"), standard_seats: Number(value("inputStandardSeats")), vip_seats: Number(value("inputVipSeats")), standard_price: Number(value("inputStandardPrice")), vip_price: Number(value("inputVipPrice")), departure_time: value("inputDep"), arrival_time: value("inputArr") };
+                    if (!payload.name || !payload.route || !payload.departure_time || !payload.arrival_time || payload.arrival_time <= payload.departure_time) throw Error("Fill train fields; arrival must be after departure.");
+                    for (const key of ["standard_seats", "vip_seats", "standard_price", "vip_price"]) if (!Number.isFinite(payload[key]) || payload[key] < 0 || (key.endsWith("seats") && !Number.isInteger(payload[key]))) throw Error("Seats must be nonnegative integers and fares nonnegative numbers.");
+                    if (id && window.currentUserRole === "STAFF") throw Error("Staff accounts cannot edit trains.");
+                    result = id ? { data: await saveExistingTrain(id, payload) } : await supabaseClient.from("trains").insert({ ...payload, available_standard_seats: payload.standard_seats, available_vip_seats: payload.vip_seats, status: payload.standard_seats + payload.vip_seats > 0 ? "Available" : "Full" }).select().single();
+                } else {
+                    const payload = { passenger_id: value("passengerSelect"), train_id: value("trainSelect"), ticket_type: value("ticketType"), reservation_date: value("input3") };
+                    if (!payload.passenger_id || !payload.train_id || !payload.reservation_date) throw Error("Select a passenger, train and date.");
+                    result = await saveExistingReservation(id || null, payload);
                 }
-
-                let route = "-";
-                let price = "0 SR";
-                let trainFound = false;
-                let trainRow = null;
-
-                // Search trainTable for route and price
-                document.querySelectorAll("#trainTable tr").forEach(row => {
-                    if (row.cells[1] && row.cells[1].innerText === train) {
-                        trainFound = true;
-                        trainRow = row;
-                        route = row.cells[2].innerText;
-
-                        // Deduct seat
-                        let stdAvail = parseInt(row.dataset.standardAvailable || 0);
-                        let vipAvail = parseInt(row.dataset.vipAvailable || 0);
-
-                        if (ticketType === "Standard") {
-                            if (stdAvail <= 0) { alert("No Standard seats left."); trainFound = false; return; }
-                            row.dataset.standardAvailable = --stdAvail;
-                        } else {
-                            if (vipAvail <= 0) { alert("No VIP seats left."); trainFound = false; return; }
-                            row.dataset.vipAvailable = --vipAvail;
-                        }
-                        row.cells[4].innerText = stdAvail + vipAvail;
-
-                        // Extract Price
-                        const priceText = row.cells[8].innerText;
-                        const match = ticketType === "VIP" ? priceText.match(/VIP\s*(\d+)/) : priceText.match(/STD\s*(\d+)/);
-                        price = match ? match[1] + " SR" : "0 SR";
-                    }
-
-                });
-
-                if (!trainFound) return;
-
-                // Find the passenger's row to get its database id
-                let passengerDbId = null;
-                document.querySelectorAll("#passengerTable tr").forEach(row => {
-                    if (row.cells[1] && row.cells[1].innerText === passenger) passengerDbId = row.dataset.dbId;
-                });
-
-                const { error: seatError } = await supabaseClient.from("trains").update({
-                    available_standard_seats: parseInt(trainRow.dataset.standardAvailable || 0),
-                    available_vip_seats: parseInt(trainRow.dataset.vipAvailable || 0)
-                }).eq("id", trainRow.dataset.dbId);
-                if (seatError) { alert("Could not update seat availability: " + seatError.message); return; }
-
-                const { data: resData, error: resError } = await supabaseClient.from("reservations").insert({
-                    passenger_id: passengerDbId,
-                    train_id: trainRow.dataset.dbId,
-                    ticket_type: ticketType,
-                    seats: 1,
-                    reservation_date: date,
-                    status: "Confirmed",
-                    price: parseFloat(price) || 0
-                }).select().single();
-                if (resError) { alert("Could not create reservation: " + resError.message); return; }
-
-                const resID = "R" + (document.querySelectorAll("#reservationTable tr").length + 10);
-
-                // 1. Add to History
-                await addToHistory(resID, date, passenger, train, ticketType, route, "1", price, "Confirmed", resData.id);
-
-                // 2. Add to Main Table
-                insertNewRow([resID, passenger, train, ticketType, "1", date, "Confirmed"], resData.id);
-
-                // 3. THE FIX: Force the Reports cards to recalculate NOW
-                updateReportAnalytics();
+                if (result.error) throw result.error;
+                persisted = true;
+                if (result.warning) alert(result.warning);
+                closeModal();
+                await loadAllData();
                 finishSave();
-                return;
-            }
-
-            // 4. ADDING NEW TRAIN
-            if (currentTable === "Train") {
-                const dep = document.getElementById("inputDep").value;
-                const arr = document.getElementById("inputArr").value;
-
-                if (!name || !emailOrRoute || !dep || !arr) { alert("Fill all train fields."); return; }
-                if (arr <= dep) { alert("Arrival time must be after departure time."); return; }
-
-                let statusText = total <= 0 ? "Full" : "Available";
-                let statusColor = total <= 0 ? "red" : "green";
-
-                const { data: trainData, error } = await supabaseClient.from("trains").insert({
-                    name: name,
-                    route: emailOrRoute,
-                    standard_seats: standard,
-                    vip_seats: vip,
-                    available_standard_seats: standard,
-                    available_vip_seats: vip,
-                    standard_price: stdPrice,
-                    vip_price: vipPrice,
-                    status: statusText,
-                    departure_time: dep,
-                    arrival_time: arr
-                }).select().single();
-                if (error) { alert("Could not add train: " + error.message); return; }
-
-                let newRow = insertNewRow(["T" + (document.querySelectorAll("#trainTable tr").length + 10), name, emailOrRoute, total, total, statusText, dep, arr, `STD ${stdPrice} / VIP ${vipPrice}`], trainData.id);
-                newRow.cells[5].style.color = statusColor;
-
-                newRow.dataset.standardAvailable = standard;
-                newRow.dataset.vipAvailable = vip;
-                newRow.dataset.standardPrice = stdPrice;
-                newRow.dataset.vipPrice = vipPrice;
-                newRow.dataset.standardSeats = standard;
-                newRow.dataset.vipSeats = vip;
-
-                finishSave();
-            }
-
-            // 5. ADDING NEW PASSENGER
-            if (currentTable === "Passenger") {
-                const phone = document.getElementById("inputPhone").value.trim();
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                const saudiPhoneRegex = /^\+9665\d{8}$/;
-
-                if (!name || !emailOrRoute || !phone) { alert("Fill all passenger fields."); return; }
-                if (!emailRegex.test(emailOrRoute)) { alert("Enter a valid email (e.g., user@email.com)"); return; }
-                if (!saudiPhoneRegex.test(phone)) { alert("Phone must be: +9665XXXXXXXX (9 digits total)"); return; }
-
-                const { data: passengerData, error } = await supabaseClient.from("passengers").insert({
-                    name: name, email: emailOrRoute, phone: phone
-                }).select().single();
-                if (error) { alert("Could not add passenger: " + error.message); return; }
-
-                insertNewRow(["P" + (document.querySelectorAll("#passengerTable tr").length + 10), name, emailOrRoute, phone], passengerData.id);
-                finishSave();
-            }
+            } catch (error) { alert((persisted ? "Saved, but refresh failed. Reload before making more changes: " : "Could not save: ") + error.message); }
+            finally { button.disabled = false; }
         };
 
         // --- HELPER FUNCTIONS TO CLEAN UP THE CODE ---
 
-        function insertNewRow(dataArray, dbId) {
-            const tableBody = document.getElementById(currentTable.toLowerCase() + "Table");
+        function insertNewRow(dataArray, dbId, type = currentTable) {
+            const tableBody = document.getElementById(type.toLowerCase() + "Table");
             const placeholderRow = Array.from(tableBody.rows).find(r => r.cells.length === 1 && r.cells[0].hasAttribute("colspan"));
             if (placeholderRow) {
                 tableBody.innerHTML = "";
@@ -2174,13 +2023,13 @@
             let actionHtml = "";
 
             // Staff can add trains but cannot edit/delete them
-            if (!(currentTable === "Train" && window.currentUserRole === "STAFF")) {
+            if (!(type === "Train" && window.currentUserRole === "STAFF")) {
                 actionHtml += `
         <button onclick="editRow(this)" class="action-btn action-edit" aria-label="Edit"><i class="fa-solid fa-pen"></i></button>
         <button onclick="deleteRow(this)" class="action-btn action-delete" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>`;
             }
 
-            if (currentTable === "Passenger") {
+            if (type === "Passenger") {
                 actionHtml += ` <button onclick="openPassengerProfile(this)" class="action-btn action-profile" aria-label="Open passenger profile"><i class="fa-solid fa-user"></i><span>Profile</span></button>`;
             }
 
@@ -2207,6 +2056,9 @@
         if (typeof updateAllCharts === "function") updateAllCharts();
         if (typeof updateQuickCards === "function") updateQuickCards();
         async function deleteRow(btn) {
+            if (btn.disabled) return;
+            btn.disabled = true;
+            try {
             const row = btn.parentElement.parentElement;
 
             if (row.parentElement.id === "trainTable" && window.currentUserRole === "STAFF") {
@@ -2214,64 +2066,11 @@
                 return;
             }
 
-            // Logic specifically for the Reservations Table
             if (row.parentElement.id === "reservationTable") {
-                // If it's already canceled, don't do anything
-                if (row.cells[6].innerText === "Canceled") return;
-
-                if (confirm("Are you sure you want to cancel this reservation?")) {
-                    const trainName = row.cells[2].innerText;
-                    const ticketType = row.cells[3].innerText; // Gets "Standard" or "VIP"
-                    let trainDbId = null;
-                    let stdAvail = 0, vipAvail = 0;
-
-                    // 1. REFUND SEAT: Find the train in the train table and add 1 seat back
-                    document.querySelectorAll("#trainTable tr").forEach(tr => {
-                        if (tr.cells[1] && tr.cells[1].innerText === trainName) {
-                            let avail = parseInt(tr.cells[4].innerText);
-                            tr.cells[4].innerText = avail + 1;
-
-                            if (ticketType === "VIP") {
-                                tr.dataset.vipAvailable = parseInt(tr.dataset.vipAvailable || 0) + 1;
-                            } else {
-                                tr.dataset.standardAvailable = parseInt(tr.dataset.standardAvailable || 0) + 1;
-                            }
-
-                            tr.cells[5].innerText = "Available"; // Ensure status is set to Available
-                            tr.cells[5].style.color = "green";
-
-                            trainDbId = tr.dataset.dbId;
-                            stdAvail = parseInt(tr.dataset.standardAvailable || 0);
-                            vipAvail = parseInt(tr.dataset.vipAvailable || 0);
-                        }
-                    });
-
-                    if (trainDbId) {
-                        await supabaseClient.from("trains").update({
-                            available_standard_seats: stdAvail,
-                            available_vip_seats: vipAvail,
-                            status: "Available"
-                        }).eq("id", trainDbId);
-                    }
-
-                    if (row.dataset.dbId) {
-                        await supabaseClient.from("reservations").update({ status: "Canceled" }).eq("id", row.dataset.dbId);
-                        await supabaseClient.from("history").update({ status: "Canceled" }).eq("reservation_id", row.dataset.dbId);
-                    }
-
-                    // 2. UPDATE RESERVATIONS TABLE: Change status to Canceled
-                    row.cells[6].innerHTML = "<span style='color:red'>Canceled</span>";
-                    btn.style.display = "none"; // Hide the button so it can't be clicked again
-
-                    // 3. SYNC HISTORY: Find the matching row in the Reports table and update it
-                    document.querySelectorAll("#historyTable tr").forEach(hr => {
-                        if (hr.dataset.reservationDbId === row.dataset.dbId) {
-                            hr.cells[8].innerHTML = "<span style='color:red'>Canceled</span>";
-                        }
-                    });
-                } else {
-                    return; // User clicked 'Cancel' on the confirm box
-                }
+                if (row.cells[6].innerText === "Canceled" || !confirm("Cancel this reservation?")) return;
+                const result = await cancelExistingReservation(row.dataset.dbId);
+                if (result.warning) alert(result.warning);
+                await loadAllData();
             } else {
                 const table = row.parentElement.id.replace("Table", "");
                 const tableName = table === "train" ? "trains" : "passengers";
@@ -2291,7 +2090,7 @@
 
                 if (confirm("Are you sure you want to delete this entry permanently?")) {
                     if (row.dataset.dbId) {
-                        const { error } = await supabaseClient.from(tableName).delete().eq("id", row.dataset.dbId);
+                        const { error } = await supabaseClient.from(tableName).delete().eq("id", row.dataset.dbId).select().single();
                         if (error) { alert("Could not delete: " + error.message); return; }
                     }
                     row.remove();
@@ -2311,6 +2110,8 @@
             updateDashboard();
             updateAllCharts();
             updateQuickCards();
+            } catch (error) { alert("Operation or refresh failed. Reload to check the current record: " + error.message); }
+            finally { btn.disabled = false; }
         }
 
         function editRow(btn) {
@@ -2321,6 +2122,14 @@
 
             openModal(type.charAt(0).toUpperCase() + type.slice(1));
 
+            if (!editingRow) return;
+            document.getElementById("modalTitle").innerText = "Edit " + currentTable;
+            if (type === "reservation") {
+                document.getElementById("passengerSelect").value = editingRow.dataset.passengerId;
+                document.getElementById("trainSelect").value = editingRow.dataset.trainId;
+                document.getElementById("ticketType").value = editingRow.cells[3].innerText;
+                document.getElementById("input3").value = editingRow.cells[5].innerText;
+            }
             if (type === "train") {
 
                 document.getElementById("input1").value = editingRow.cells[1].innerText;
@@ -2346,81 +2155,22 @@
 
             }
         }
-        // function populateDropdowns() {
-        //     const pS = document.getElementById("passengerSelect"), tS = document.getElementById("trainSelect");
-        //     pS.innerHTML = '<option value="">-- Passenger --</option>';
-        //     tS.innerHTML = '<option value="">-- Train --</option>';
-        //     document.querySelectorAll("#passengerTable tr").forEach(r => pS.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`);
-        //     document.querySelectorAll("#trainTable tr").forEach(r => {
-        //         if (parseInt(r.cells[4].innerText) > 0) tS.innerHTML += `<option value="${r.cells[1].innerText}">${r.cells[1].innerText}</option>`;
-        //     });
-        // }
         function populateDropdowns() {
-            const pSelect = document.getElementById("passengerSelect");
-            const tSelect = document.getElementById("trainSelect");
-
-            pSelect.innerHTML = '<option value="">-- Select Passenger --</option>';
-            tSelect.innerHTML = '<option value="">-- Select Train --</option>';
-
-            // passengers
-            document.querySelectorAll("#passengerTable tr").forEach(r => {
-                if (r.cells.length > 1) {
-                    const name = r.cells[1].innerText;
-                    pSelect.innerHTML += `<option value="${name}">${name}</option>`;
-                }
-            });
-
-            // trains
-            document.querySelectorAll("#trainTable tr").forEach(r => {
-                if (r.cells.length > 4) {
-                    const name = r.cells[1].innerText;
-                    const available = parseInt(r.cells[4].innerText);
-                    if (available > 0) {
-                        tSelect.innerHTML += `<option value="${name}">${name}</option>`;
-                    }
-                }
-            });
-        }
-        async function addToHistory(id, date, passenger, train, ticketType, route, seats, price, status, reservationDbId) {
-            let historyDbId = null;
-            if (reservationDbId) {
-                const { data, error } = await supabaseClient.from("history").insert({
-                    reservation_id: reservationDbId,
-                    reservation_date: date,
-                    passenger_name: passenger,
-                    train_name: train,
-                    ticket_type: ticketType,
-                    route: route,
-                    seats: parseInt(seats) || 1,
-                    price: parseFloat(price) || 0,
-                    status: status
-                }).select().single();
-                if (error) { alert("Could not save history record: " + error.message); }
-                else historyDbId = data.id;
+            for (const [selectId, tableId, label] of [["passengerSelect", "passengerTable", "Passenger"], ["trainSelect", "trainTable", "Train"]]) {
+                const select = document.getElementById(selectId);
+                select.replaceChildren(new Option("-- Select " + label + " --", ""));
+                const rows = Array.from(document.querySelectorAll("#" + tableId + " tr[data-db-id]"));
+                rows.forEach(row => {
+                    if (tableId === "trainTable" && Number(row.cells[4].innerText) <= 0 && row.dataset.dbId !== editingRow?.dataset.trainId) return;
+                    const name = row.cells[1].innerText;
+                    const duplicate = rows.some(other => other !== row && other.cells[1].innerText === name);
+                    select.add(new Option(name + (duplicate ? " (" + row.dataset.dbId.slice(0, 8) + ")" : ""), row.dataset.dbId));
+                });
             }
-
-            const hT = document.getElementById("historyTable");
-            if (hT.innerHTML.includes("No history") || hT.innerHTML.trim() === "") hT.innerHTML = "";
-
-            const row = hT.insertRow(0);
-            if (historyDbId) row.dataset.dbId = historyDbId;
-            if (reservationDbId) row.dataset.reservationDbId = reservationDbId;
-            // index 0: ID, 1: Date, 2: Passenger, 3: Train, 4: Ticket Type, 5: Route, 6: Seats, 7: Price, 8: Status
-            row.innerHTML = `
-        <td>${id}</td>
-        <td>${date}</td>
-        <td>${passenger}</td>
-        <td>${train}</td>
-        <td>${ticketType === "VIP" ? "<span class='vip'>VIP</span>" : "Standard"}</td>
-        <td>${route}</td>
-        <td>${seats}</td>
-        <td>${price}</td>
-        <td><span style="color:${status === 'Confirmed' ? 'green' : 'red'}">${status}</span></td>
-    `;
         }
-
 
         function matchesReportPeriod(rowDate, type, now) {
+            if (Number.isNaN(rowDate.getTime())) return false;
             if (!type) return true;
             if (type === "daily") {
                 return rowDate.toDateString() === now.toDateString();
@@ -2428,7 +2178,7 @@
 
             if (type === "weekly") {
                 const diff = (now - rowDate) / (1000 * 60 * 60 * 24);
-                return diff <= 7;
+                return diff >= 0 && diff < 7;
             }
 
             if (type === "monthly") {
@@ -2441,7 +2191,7 @@
         function getReportMetrics(type) {
             const rows = document.querySelectorAll("#historyTable tr");
             const now = new Date();
-            const routeCounts = {};
+            const routeCounts = Object.create(null);
             const passengerSet = new Set();
             let totalRevenue = 0;
             let confirmedBookings = 0;
@@ -2469,19 +2219,19 @@
                 const seatsNum = parseInt(seatsText, 10);
 
                 if (passenger) passengerSet.add(passenger);
-                if (route) routeCounts[route] = (routeCounts[route] || 0) + 1;
-                if (!isNaN(seatsNum)) seatsSold += seatsNum;
 
                 const isConfirmed = statusText.includes("Confirmed");
                 const isVipTicket = ticketType.includes("VIP");
 
                 if (isConfirmed) {
+                    if (route) routeCounts[route] = (routeCounts[route] || 0) + 1;
+                    if (!isNaN(seatsNum)) seatsSold += seatsNum;
                     confirmedBookings++;
 
                     const priceText = row.cells[7].innerText.replace(/[^\d.-]/g, "");
                     const priceNum = parseFloat(priceText);
                     if (!isNaN(priceNum)) {
-                        totalRevenue += priceNum;
+                        totalRevenue += priceNum * (seatsNum || 0);
                     }
 
                     if (isVipTicket) {
@@ -2506,7 +2256,7 @@
         }
 
         function updateReportAnalytics() {
-            const metrics = getReportMetrics(null);
+            const metrics = getReportMetrics(currentReportType);
 
             const revEl = document.getElementById("totalRevenue");
             const bookEl = document.getElementById("totalBookings");
@@ -2817,6 +2567,9 @@
             });
         }
 
+        function escapeHtml(value) {
+            return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        }
         function updateTrainTracking() {
 
             const container = document.querySelector(".map-card");
@@ -2844,13 +2597,13 @@
                     <div class="track-main">
                         <span class="track-icon" aria-hidden="true"><i class="fa-solid fa-train-subway"></i></span>
                         <div class="track-text">
-                            <strong class="track-name">${name}</strong>
-                            <span class="track-route">${route}</span>
+                            <strong class="track-name">${escapeHtml(name)}</strong>
+                            <span class="track-route">${escapeHtml(route)}</span>
                         </div>
                     </div>
 
                     <span class="track-status ${statusClass}">
-                        ${status}
+                        ${escapeHtml(status)}
                     </span>
                 </div>
             `;
@@ -2903,30 +2656,9 @@
             });
 
             reservationRows.forEach(row => {
-                if (row.cells.length > 6) {
+                if (row.dataset.dbId && row.cells[6].innerText === "Confirmed") {
                     totalBookings++;
-
-                    const trainName = row.cells[2].innerText.trim();
-                    const ticketType = row.cells[3].innerText.trim();
-
-                    document.querySelectorAll("#trainTable tr").forEach(tr => {
-                        if (tr.cells.length > 8 && tr.cells[1].innerText.trim() === trainName) {
-
-                            const priceText = tr.cells[8].innerText.trim();
-
-                            const stdMatch = priceText.match(/STD\s*(\d+(\.\d+)?)/);
-                            const vipMatch = priceText.match(/VIP\s*(\d+(\.\d+)?)/);
-
-                            const stdPrice = stdMatch ? parseFloat(stdMatch[1]) : 0;
-                            const vipPrice = vipMatch ? parseFloat(vipMatch[1]) : 0;
-
-                            if (ticketType.includes("VIP")) {
-                                totalRevenue += vipPrice;
-                            } else {
-                                totalRevenue += stdPrice;
-                            }
-                        }
-                    });
+                    totalRevenue += Number(row.dataset.price || 0) * Number(row.cells[4].innerText);
                 }
             });
 
@@ -3054,15 +2786,15 @@
             const phone = row.cells[3].innerText;
 
             const { data: historyRows, error } = await supabaseClient
-                .from("history")
-                .select("*")
-                .eq("passenger_name", name);
+                .from("reservations")
+                .select("*, trains(name, route)")
+                .eq("passenger_id", row.dataset.dbId);
             if (error) { alert("Could not load passenger history: " + error.message); return; }
 
             const reservations = (historyRows || []).map(r => ({
-                passenger: r.passenger_name,
-                train: r.train_name,
-                route: r.route,
+                passenger: name,
+                train: r.trains?.name,
+                route: r.trains?.route,
                 date: r.reservation_date,
                 ticketType: r.ticket_type,
                 seats: r.seats,
@@ -3081,20 +2813,20 @@
                     <div class="profile-avatar" aria-hidden="true"><i class="fa-solid fa-user"></i></div>
                     <div>
                         <p class="profile-subtitle" style="margin:0;">Passenger record</p>
-                        <h3 class="profile-title">${name}</h3>
+                        <h3 class="profile-title">${escapeHtml(name)}</h3>
                         <p class="profile-subtitle">Customer profile and reservation history</p>
-                        <span class="profile-badge"><i class="fa-solid fa-id-card"></i> ID ${id}</span>
+                        <span class="profile-badge"><i class="fa-solid fa-id-card"></i> ID ${escapeHtml(id)}</span>
                     </div>
                 </div>
                 <div class="profile-body">
                     <div class="profile-summary-grid">
                         <div class="profile-summary-card">
                             <div class="label"><i class="fa-solid fa-envelope"></i>Email</div>
-                            <div class="value">${email || "Not available"}</div>
+                            <div class="value">${escapeHtml(email || "Not available")}</div>
                         </div>
                         <div class="profile-summary-card">
                             <div class="label"><i class="fa-solid fa-phone"></i>Phone</div>
-                            <div class="value">${phone || "Not available"}</div>
+                            <div class="value">${escapeHtml(phone || "Not available")}</div>
                         </div>
                         <div class="profile-summary-card">
                             <div class="label"><i class="fa-solid fa-ticket"></i>Reservations</div>
@@ -3110,7 +2842,7 @@
                         </div>
                         <div class="profile-summary-card">
                             <div class="label"><i class="fa-solid fa-calendar-days"></i>Latest Trip</div>
-                            <div class="value">${latestDate}</div>
+                            <div class="value">${escapeHtml(latestDate)}</div>
                         </div>
                     </div>
                     <div class="profile-section-title">
@@ -3142,17 +2874,17 @@
                         <div class="profile-reservation-card">
                             <div class="profile-reservation-top">
                                 <div>
-                                    <div class="profile-reservation-route"><i class="fa-solid fa-train-subway"></i>${r.train || "Unknown train"}</div>
+                                    <div class="profile-reservation-route"><i class="fa-solid fa-train-subway"></i>${escapeHtml(r.train || "Unknown train")}</div>
                                     <div class="profile-reservation-meta">
-                                        <span><i class="fa-solid fa-calendar-days"></i>${r.date || "No date"}</span>
-                                        <span><i class="fa-solid fa-location-dot"></i>${r.route || "Route not specified"}</span>
+                                        <span><i class="fa-solid fa-calendar-days"></i>${escapeHtml(r.date || "No date")}</span>
+                                        <span><i class="fa-solid fa-location-dot"></i>${escapeHtml(r.route || "Route not specified")}</span>
                                     </div>
                                 </div>
-                                <span class="profile-status ${statusClass}">${status}</span>
+                                <span class="profile-status ${statusClass}">${escapeHtml(status)}</span>
                             </div>
                             <div class="profile-reservation-footer">
-                                <span><i class="fa-solid fa-ticket"></i>${ticketType}</span>
-                                <span><i class="fa-solid fa-chair"></i>${seats} seat${parseInt(seats, 10) === 1 ? "" : "s"}</span>
+                                <span><i class="fa-solid fa-ticket"></i>${escapeHtml(ticketType)}</span>
+                                <span><i class="fa-solid fa-chair"></i>${escapeHtml(seats)} seat${parseInt(seats, 10) === 1 ? "" : "s"}</span>
                             </div>
                         </div>
                     `;
@@ -3223,6 +2955,7 @@
 
         </div>
     </div>
+    <script src="data-operations.js"></script>
     <script src="storage.js"></script>
     <script src="dashboard.js"></script>
     <script src="chatbot.js"></script>

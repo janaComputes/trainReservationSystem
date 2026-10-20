@@ -1,5 +1,11 @@
+let signingUp = false;
 document.getElementById("signupForm").onsubmit = async function(e) {
     e.preventDefault();
+    const button = e.submitter;
+    if (signingUp) return;
+    signingUp = true;
+    if (button) button.disabled = true;
+    try {
 
     const name = document.getElementById("newUsername").value.trim();
     const email = document.getElementById("newEmail").value.trim();
@@ -10,7 +16,6 @@ document.getElementById("signupForm").onsubmit = async function(e) {
         alert("Please select a role!");
         return;
     }
-    const role = roleElement.value;
 
     // ✅ تحقق الموافقة على الخصوصية
     const privacyAccepted = document.getElementById("privacyCheck").checked;
@@ -38,11 +43,11 @@ document.getElementById("signupForm").onsubmit = async function(e) {
     // ✅ إنشاء الحساب عبر Supabase Auth
     document.getElementById("signupError").innerText = "";
 
-    const { error } = await supabaseClient.auth.signUp({
+    const { data, error } = await supabaseClient.auth.signUp({
         email: email,
         password: pass,
         options: {
-            data: { username: name, role: role.toUpperCase() }
+            data: { username: name, role: roleElement.value.toUpperCase() }
         }
     });
 
@@ -51,6 +56,9 @@ document.getElementById("signupForm").onsubmit = async function(e) {
         return;
     }
 
-    alert("Account created! You can now log in.");
+    alert(data.session ? "Account created! You can now log in." : "Check your email for a confirmation link before signing in.");
     showLogin();
+    } catch (error) {
+        document.getElementById("signupError").textContent = "Could not create account: " + error.message;
+    } finally { signingUp = false; if (button) button.disabled = false; }
 };

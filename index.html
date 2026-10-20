@@ -18,89 +18,24 @@
 <p class="subtitle">Sign in to manage reservations and passengers</p>
 
 <form id="loginForm">
-<div id="verificationContainer" style="display:none; text-align:center; margin-top:20px;">
-    <h3>Email Verification</h3>
-    <p>Enter the 4-digit code sent to your email:</p>
-    <div id="codeBoxesContainer" style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
-        <input type="text" maxlength="1" class="codeBox" disabled />
-        <input type="text" maxlength="1" class="codeBox" disabled />
-        <input type="text" maxlength="1" class="codeBox" disabled />
-        <input type="text" maxlength="1" class="codeBox" disabled />
-    </div>
-    <button id="verifyCodeBtn" style="margin-top:15px; padding:10px 20px; font-size:16px; cursor:pointer;">Verify</button>
-    <p id="codeError" style="color:red; margin-top:10px;"></p>
-</div>
-
-<style>
-.codeBox {
-    width: 50px;
-    height: 50px;
-    text-align: center;
-    font-size: 24px;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    outline: none;
-    transition: 0.2s;
-}
-.codeBox:focus {
-    border-color: #2f6cac;
-    box-shadow: 0 0 0 3px rgba(47, 108, 172, 0.2);
-}
-#verifyCodeBtn:hover {
-    background: linear-gradient(135deg, #1f4f85, #2f6cac);
-    color: white;
-}
-</style>
-
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const loginForm = document.getElementById("loginForm");
-    const verificationContainer = document.getElementById("verificationContainer");
-    const codeBoxes = document.querySelectorAll(".codeBox");
-    const verifyBtn = document.getElementById("verifyCodeBtn");
-    const codeError = document.getElementById("codeError");
-    let verificationCode = "";
-
-    loginForm.addEventListener("submit", async function(e){
-        e.preventDefault();
-        const email = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
-        document.getElementById("error").innerText = "";
-
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-        if (error) {
-            document.getElementById("error").innerText = error.message;
-            return;
-        }
-
-        // توليد رمز 4 أرقام عشوائي
-        verificationCode = Math.floor(1000 + Math.random()*9000).toString();
-        console.log("Verification code (for testing):", verificationCode);
-
-        // إظهار المربعات فارغة
-        codeBoxes.forEach(box => box.value = "");
-        verificationContainer.style.display = "block";
-
-        // تعبئة الأرقام تلقائيًا بعد 2 ثانية
-        setTimeout(() => {
-            codeBoxes.forEach((box, idx) => {
-                setTimeout(() => {
-                    box.value = verificationCode[idx];
-                }, idx * 300); // كل رقم يظهر بعد 300ms عن الرقم السابق
-            });
-        }, 2000); // الانتظار ثانيتين قبل البدء
-    });
-
-    // التحقق عند الضغط على زر Verify
-    verifyBtn.addEventListener("click", function(){
-        const userCode = Array.from(codeBoxes).map(box => box.value).join("");
-        if(userCode === verificationCode){
+document.addEventListener("DOMContentLoaded", () => {
+    let signingIn = false;
+    document.getElementById("loginForm").onsubmit = async event => {
+        event.preventDefault();
+        if (signingIn) return;
+        signingIn = true;
+        const message = document.getElementById("error");
+        const button = event.submitter;
+        if (button) button.disabled = true;
+        try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email: document.getElementById("username").value.trim(), password: document.getElementById("password").value });
+            if (error) throw error;
+            if (!data.session) throw Error("No session was returned. Please try signing in again.");
             window.location.href = "admin.html";
-        } else {
-            codeError.innerText = "Something went wrong!";
-        }
-    });
+        } catch (error) { message.textContent = error.message; }
+        finally { signingIn = false; if (button) button.disabled = false; }
+    };
 });
 </script>
 <label>Email</label>

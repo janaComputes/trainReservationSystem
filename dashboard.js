@@ -1,22 +1,28 @@
 
 (async function () {
-  const { data: { session } } = await supabaseClient.auth.getSession();
+  const { data: { session }, error } = await supabaseClient.auth.getSession();
+  if (error) { alert("Could not check session: " + error.message); return; }
   if (!session) {
     window.location.href = "index.html";
   }
 })();
 
 async function logout() {
-  await supabaseClient.auth.signOut();
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) { alert(error.message); return; }
   window.location.href = "index.html";
 }
 
 async function calculateOccupancy() {
+  if (document.getElementById("trainTable")) return;
   const occupancyEl = document.getElementById("occupancyRate");
   if (!occupancyEl) return;
 
-  const { count: trainsCount } = await supabaseClient.from("trains").select("*", { count: "exact", head: true });
-  const { count: reservationsCount } = await supabaseClient.from("reservations").select("*", { count: "exact", head: true });
+  const { data, error } = await supabaseClient.from("trains").select("standard_seats,vip_seats,available_standard_seats,available_vip_seats");
+  if (error) { occupancyEl.textContent = "Unavailable"; console.error(error); return; }
+  const trainsCount = data.reduce((n, t) => n + Number(t.standard_seats) + Number(t.vip_seats), 0);
+  const free = data.reduce((n, t) => n + Number(t.available_standard_seats) + Number(t.available_vip_seats), 0);
+  const reservationsCount = trainsCount - free;
 
   if (!trainsCount) {
     occupancyEl.innerText = "0%";
@@ -30,6 +36,7 @@ async function calculateOccupancy() {
 window.addEventListener("load", calculateOccupancy);
 
 function openBookingConfirm(passenger, train, date){
+if (!document.getElementById("bookingDetails") || !document.getElementById("bookingConfirmModal")) return;
 
 document.getElementById("bookingDetails").innerText =
 "Passenger: " + passenger +
@@ -47,17 +54,18 @@ function closeBookingModal() {
 
 function confirmBooking() {
   closeBookingModal();
-  alert("Booking confirmed successfully!");
+  // Only the persisted reservation operation can confirm a booking.
 }
 
 async function updateDashboardStats(){
-  const { count: trainCount } = await supabaseClient.from("trains").select("*", { count: "exact", head: true });
-  const { count: reservationCount } = await supabaseClient.from("reservations").select("*", { count: "exact", head: true });
-  const { count: passengerCount } = await supabaseClient.from("passengers").select("*", { count: "exact", head: true });
-
-  document.getElementById("totalTrains").innerText = trainCount || 0;
-  document.getElementById("totalReservations").innerText = reservationCount || 0;
-  document.getElementById("totalPassengers").innerText = passengerCount || 0;
+  if (document.getElementById("trainTable")) return;
+  for (const [id, table] of [["totalTrains", "trains"], ["totalReservations", "reservations"], ["totalPassengers", "passengers"]]) {
+    const target = document.getElementById(id);
+    if (!target) continue;
+    const { count, error } = await supabaseClient.from(table).select("*", { count: "exact", head: true });
+    target.textContent = error ? "Unavailable" : count;
+    if (error) console.error(error);
+  }
 }
 
 window.addEventListener("load", updateDashboardStats);
